@@ -22,9 +22,10 @@ Where X[i][j] is the requirement for the i-derivative of the j-th waypoint.
 [1 t t^2 t^3 ...] * c1 = p1(t)
 [1 t t^2 t^3 ...] * c2 = p2(t)
 
-@author: Luigi Pannocchi
+@author: l.pannocchi@gmail.com
 """
 import numpy as np
+import scipy as sp
 
 ## =================================================
 ## =================================================
@@ -229,17 +230,23 @@ def buildInterpolationProblem(X, deg, T, abstime):
                 if (not np.isnan(X[j,i])):
                     # Waypoint "i" is connects Polynomial i-1 and Polynomial i
                     b[counter] = X[j,i]
-                    v = t_vec(Dt[i], deg)
+
+                    v = t_vec(Dt[i-1], deg)
                     A[counter, selIndex(i-1, nCoef)] = polyder(v, j)
                     counter = counter + 1
+
                     b[counter] = X[j,i]
                     v = t_vec(0, deg)
                     A[counter, selIndex(i, nCoef)] = polyder(v, j)
                 # Only continuity constraint
                 else:
                     b[counter] = 0
-                    A[counter, selIndex(i-1, nCoef)] = t_vec(Dt[i], deg)
-                    A[counter, selIndex(i, nCoef)] = t_vec(0, deg)
+
+                    v = t_vec(Dt[i-1], deg)
+                    A[counter, selIndex(i-1, nCoef)] = polyder(v, j)
+
+                    v = t_vec(0, deg)
+                    A[counter, selIndex(i, nCoef)] = -1 * polyder(v, j)
 
             # If First of Last
             else:
@@ -273,6 +280,7 @@ def interpolPolys(X, deg, T, abstime):
 
     Output:
         sol:   Solution vector of the Ax = b problem (All coeff in a row)
+        nullx: Null space of the A
         res:   Residuals of the interpolation problem
         polys: Matrix with the polynomial coefficients ([a_0 a_1 ...a_deg])
                on the rows. The polynomial would be (a_0 + a_1*t + a_2*t^2 ...)
@@ -280,6 +288,8 @@ def interpolPolys(X, deg, T, abstime):
     """
     nCoeff = deg + 1
     [A, b] = buildInterpolationProblem(X, deg, T, abstime)
+
+    nullx = sp.linalg.null_space(A)
 
     [sol, res, _, _] = np.linalg.lstsq(A, b, rcond=None)
 
@@ -289,4 +299,4 @@ def interpolPolys(X, deg, T, abstime):
     for i in range(npolys):
         polys[i,:] = sol[i * nCoeff: (i+1) * nCoeff]
 
-    return (sol, res, polys)
+    return (sol, nullx, res, polys)
