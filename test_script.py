@@ -23,32 +23,21 @@ print('Test with {:d}th order polynomial.'.format(ndeg))
 nconstr = 4
 print('Number of constraint on the flat output = {:d}.'.format(nconstr))
 
-# Initial Point
-t0 = 0
-s0 = np.zeros((nconstr, 1), dtype=float)
-s0[0] = 0.0
 
-# Intermediate point
-t1 = 8
-si1 = np.empty((nconstr,1))
-si1[:] = np.nan
-si1[2] = -0.2
-
-
-# Final point
-t2 = 15
-sf = np.zeros((nconstr, 1), dtype=float)
-sf[0] = 1.0
-sf[2] = 0.0
-
-
-t = np.array([t0, t1, t2]);
-toff = np.array([t0, t1])
-Dt = np.array([t1-t0, t2-t1]);
+# Times
+t = np.array([0, 5, 15, 20]);
+toff = np.array([t[0], t[1], t[2]])
+Dt = t[1:len(t)] - t[0:len(t)-1]
 
 # Build the constraint matrix
+X = np.array([
+        [ 0,   0.5,  0.7, 1, ],
+        [ 0,   np.nan,  np.nan, 0, ],
+        [ 0,     -0.2,  np.nan, 0, ],
+        [ 0,   np.nan,  np.nan, 0, ],
+        ])
+
 print('\n')
-X = np.concatenate((s0, si1, sf), axis=1)
 nW = X.shape[1]
 print("Constraints matrix = \n", X)
 print('\n')
@@ -79,22 +68,23 @@ print("Null Space basis: \n", nullx)
 
 print("Residuals: \n", res)
 
-if (abs(res) > 0.001):
+if (res.size>0 and abs(res) > 0.001):
     print("WARNING! PROBABLY YOU WON\'T BE SATISFIED WITH THE SOLUTION")
 
-print("\n-------- Test -------")
+print("\n-------- Test Some Constraints-------")
 S_test = np.zeros((nconstr, 4))
 
-T0 = tj.constrMat(tj.t_vec(t0, ndeg), [i for i in range(nconstr)])
+
+T0 = tj.constrMat(tj.t_vec(0, ndeg), [i for i in range(nconstr)])
 S_test[:,0] = np.matmul(T0, polys[0,:])
 
-T1 = tj.constrMat(tj.t_vec(t1, ndeg), [i for i in range(nconstr)])
+T1 = tj.constrMat(tj.t_vec(Dt[0], ndeg), [i for i in range(nconstr)])
 S_test[:,1] = np.matmul(T1, polys[0,:])
 
 T1 = tj.constrMat(tj.t_vec(0, ndeg), [i for i in range(nconstr)])
 S_test[:,2] = np.matmul(T1, polys[1,:])
 
-T2 = tj.constrMat(tj.t_vec(t2-t1, ndeg), [i for i in range(nconstr)])
+T2 = tj.constrMat(tj.t_vec(Dt[1], ndeg), [i for i in range(nconstr)])
 S_test[:,3] = np.matmul(T2, polys[1,:])
 
 print('{:1s} | {:^5s}| {:^5s}| {:^5s}'.format("N","x","x\'","x\'\'"))
@@ -113,8 +103,10 @@ fig.tight_layout()
 plt_count = 0
 
 Nsamples = 1000
-t = np.zeros((2, Nsamples))
-y = np.zeros((2, Nsamples))
+t = np.zeros((len(Dt), Nsamples))
+y = np.zeros((len(Dt), Nsamples))
+
+# Position
 for i in range(len(Dt)):
     t[i, :] = np.linspace(0.0, Dt[i], Nsamples)
     y[i,:] = np.polynomial.polynomial.polyval(t[i,:], polys[i,:])
@@ -126,6 +118,7 @@ axes[plt_count].set_title('Position')
 axes[plt_count].grid(True)
 plt_count += 1
 
+# Velocity
 for i in range(len(Dt)):
     t[i, :] = np.linspace(0.0, Dt[i], Nsamples)
     pder = np.polynomial.polynomial.polyder(polys[i,:])
@@ -138,6 +131,7 @@ axes[plt_count].set_title('Velocity')
 axes[plt_count].grid(True)
 plt_count += 1
 
+# Acceleration
 for i in range(len(Dt)):
     t[i, :] = np.linspace(0.0, Dt[i], Nsamples)
     pder2 = np.polynomial.polynomial.polyder(polys[i,:], m=2)
