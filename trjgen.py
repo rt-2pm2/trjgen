@@ -1,6 +1,4 @@
 """
-Script to test the trajectory generation library
-
 Support for trajectory generation
 
 deg: degree of the polynomial used for describing the trajectory
@@ -25,7 +23,7 @@ Where X[i][j] is the requirement for the i-derivative of the j-th waypoint.
 @author: l.pannocchi@gmail.com
 """
 import numpy as np
-import scipy as sp
+import scipy.linalg as linalg
 
 ## =================================================
 ## =================================================
@@ -289,9 +287,9 @@ def interpolPolys(X, deg, T, abstime):
     nCoeff = deg + 1
     [A, b] = buildInterpolationProblem(X, deg, T, abstime)
 
-    nullx = sp.linalg.null_space(A)
+    nullx = linalg.null_space(A)
 
-    [sol, res, _, _] = np.linalg.lstsq(A, b, rcond=None)
+    [sol, res, _, _] = linalg.lstsq(A, b)
 
     npolys = int(len(sol) / nCoeff)
 
