@@ -25,16 +25,18 @@ print('Number of constraint on the flat output = {:d}.'.format(nconstr))
 
 
 # Times
-t = np.array([0, 5, 15, 20]);
-toff = np.array([t[0], t[1], t[2]])
+t = np.array([0, 1, 2.5, 3, 4])
 Dt = t[1:len(t)] - t[0:len(t)-1]
+
+toff = np.zeros(len(Dt) + 1);
+toff[1: len(Dt) + 1] = np.matmul(np.tril(np.ones((len(Dt), len(Dt))), 0), np.array(Dt))
 
 # Build the constraint matrix
 X = np.array([
-        [ 0,   0.5,  0.7, 1, ],
-        [ 0,   np.nan,  np.nan, 0, ],
-        [ 0,     -0.2,  np.nan, 0, ],
-        [ 0,   np.nan,  np.nan, 0, ],
+        [ 0,   0.0,     2.0,    2.5,    2.5],
+        [ 0,   np.nan,  np.nan, np.nan,  0.0],
+        [ 0,     -0.2,  np.nan, np.nan,  0.0],
+        [ 0,   np.nan,  np.nan, np.nan,  0.0],
         ])
 
 print('\n')
