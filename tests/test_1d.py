@@ -7,7 +7,7 @@ Script to test the trajectory generation library
 """
 
 import numpy as np
-import trjgen as tj
+from trjgen import trjgen as tj
 from matplotlib import pyplot as plt
 
 np.set_printoptions(precision=6)
@@ -16,7 +16,7 @@ np.set_printoptions(suppress=True)
 #============================================================================
 
 # Polynomial characteristic:  order
-ndeg = 6
+ndeg = 7
 print('Test with {:d}th order polynomial.'.format(ndeg))
 
 ## Waipoints in the flat output space (or dimension 3)
@@ -111,8 +111,8 @@ y = np.zeros((len(Dt), Nsamples))
 # Position
 for i in range(len(Dt)):
     t[i, :] = np.linspace(0.0, Dt[i], Nsamples)
-    y[i,:] = np.polynomial.polynomial.polyval(t[i,:], polys[i,:])
-    axes[plt_count].plot(t[i,:] + toff[i], y[i,:])
+    y[i,:] = np.polynomial.polynomial.polyval(t[i, :], polys[i, :])
+    axes[plt_count].plot(t[i, :] + toff[i], y[i, :])
 
 axes[plt_count].set_xlabel('time (s)')
 axes[plt_count].set_ylabel('(m)')
