@@ -36,8 +36,8 @@ def interpolPolys(X, deg, T, abstime):
 
     Args
         X:   Matrix of the constraints Nconstr x Nwaypoinst
-        deg; Degree of the polynomial to fit to describe the pieces
-        T:  Vector with the time information
+        deg: Degree of the polynomial to fit to describe the pieces
+        T: Knots points for the interpolation 
         abstime: Flag to specify whether the t vector represents
                     durations or absolute time
 
@@ -47,7 +47,7 @@ def interpolPolys(X, deg, T, abstime):
         nullx: Null space of the A
         res:   Residuals of the interpolation problem
         polys: Matrix with the polynomial coefficients ([a_0 a_1 ...a_deg])
-               for each piece of trajectory on the rows. 
+               for each piece of trajectory on the rows.
                The polynomial would be (a_0 + a_1*t + a_2*t^2 ...)
 
     """
@@ -74,9 +74,10 @@ def buildInterpolationProblem(X, deg, T, abstime):
     Build the interpolation problem A * x = b
 
     Args
-        X:   Matrix of the constraints Nconstr x Nwaypoinst
+        X:   Matrix of the constraints Nconstr x Nwaypoints
         deg; Degree of the polynomial to fit to describe the pieces
-        T:  Vector with the time information
+        T:  Vector with the time information (Either the waypoint pass time
+                                              or the duration for each piece)
         abstime: Flag to specify whether the t vector represents
                     durations or absolute time
 
@@ -161,12 +162,12 @@ def buildInterpolationProblem(X, deg, T, abstime):
 def pp2file(Dt, polysX, polysY, polysZ, filename):
     """
     Save the polynomial coefficients to file
-    The file will have a row for each piece and the row has the 
+    The file will have a row for each piece and the row has the
     following format:
 
     Time_interval x_polynomial_coeff y_poly_coeff z_poly_coeff
 
-    """ 
+    """
     f = open(filename, "w")
 
     # I consider all the polynomial to be the same size
@@ -187,7 +188,7 @@ def pp2file(Dt, polysX, polysY, polysZ, filename):
 
 
 ######################################################################
-## Helper functions for polynomial generation 
+## Helper functions for polynomial generation
 
 
 ## =================================================
