@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Helper functions for trajectory generation and plotting
 
@@ -11,7 +9,74 @@ import numpy.polynomial.polynomial as pl
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import pyplot as plt
 
+# Import evaluation helper funcions for Piecewise polynomial
+from trjgen import pwpoly_helpers as pwh
 
+## =================================================
+## =================================================
+def TrajFromPW(Tv, derlist, pwpolx=None, pwpoly=None, pwpolz=None, pwpolw=None):
+    """
+    Generate the trjactory at the time Tv from the polynomial describing the
+    X, Y, Z and Y.
+
+    Args
+        Tv: Time vector
+        pwpolx: Polynomial describing the position on the X
+        pwpoly: Polynomial describing the position on the Y
+        pwpolz: Polynomial describing the position on the Z
+        pwpolw: Polynomial describing the position on the Yaw
+        derlist: List of the order of derivatives to be evaluated
+
+    Output
+
+    """
+
+    if (pwpolx != None):
+        X = pwh.pwpTo1D(Tv, pwpolx, derlist)
+    else:
+        X = np.zeros((len(derlist), len(Tv)))
+
+    if (pwpoly != None):
+        Y = pwh.pwpTo1D(Tv, pwpoly, derlist)
+    else:
+        Y = np.zeros((len(derlist), len(Tv)))
+
+    if (pwpolz != None):
+        Z = pwh.pwpTo1D(Tv, pwpolz, derlist)
+    else:
+        Z = np.zeros((len(derlist), len(Tv)))
+
+    if (pwpolw != None):
+        W = pwh.pwpTo1D(Tv, pwpolw, derlist)
+    else:
+        W = np.zeros((len(derlist), len(Tv)))
+
+
+    for i in range(len(derlist)):
+        # Create the figure and axes
+        plt.figure(i)
+        ax = plt.axes(projection='3d')
+        title_str = 'Derivative n = {:1d}'.format(derlist[i])
+        print(title_str)
+        ax.set_title(title_str)
+        if derlist[i] == 0:
+            ax.set_xlabel("x [m]")
+            ax.set_ylabel("y [m]")
+            ax.set_zlabel("z [m]")
+        if derlist[i] == 1:
+            ax.set_xlabel("x [m/s]")
+            ax.set_ylabel("y [m/s]")
+            ax.set_zlabel("z [m/s]")
+        if derlist[i] == 2:
+            ax.set_xlabel("x [m/s^2]")
+            ax.set_ylabel("y [m/s^2]")
+            ax.set_zlabel("z [m/s^2]")
+
+        p = ax.scatter(X[i, :], Y[i, :], Z[i, :], c = Tv)
+        plt.colorbar(p)
+        plt.show()
+
+    return (X, Y, Z, W)
 
 ## =================================================
 ## =================================================
@@ -95,7 +160,7 @@ def plotThrustMargin(T, X, Y, Z, vehicle_mass, thrust_constr):
 
 
 ######################################################################
-## Helper functions for polynomial plotting 
+## Helper functions for polynomial plotting
 
 def jointPieces(Dt, Nsamples, polys, der_list):
     # Number of derivates to evaluate
@@ -131,11 +196,12 @@ def jointPieces(Dt, Nsamples, polys, der_list):
 
     return (T, Y)
 
+
 ## =================================================
 ## =================================================
 def polysTo1D(Dt, Nsamples, polysx, der):
     """
-    Generate the 1D trajectory in space from polynomials 
+    Generate the 1D trajectory in space from polynomials
     """
     [T, X] = jointPieces(Dt, Nsamples, polysx, der)
 
@@ -146,7 +212,7 @@ def polysTo1D(Dt, Nsamples, polysx, der):
 ## =================================================
 def polysTo3D(Dt, Nsamples, polysx, polysy, polysz, der):
     """
-    Generate the 3D trajectory in space from polynomials 
+    Generate the 3D trajectory in space from polynomials
     """
     [T, X] = jointPieces(Dt, Nsamples, polysx, der)
     [_, Y] = jointPieces(Dt, Nsamples, polysy, der)
