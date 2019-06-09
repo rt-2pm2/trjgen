@@ -29,7 +29,7 @@ import scipy.linalg as linalg
 
 ## =================================================
 ## =================================================
-def interpolPolys(X, deg, T, abstime):
+def interpolPolys(X, deg, T, is_abstime):
     """
     Find the coefficients of the polynomials interpolating a given series
     of waypoints
@@ -37,7 +37,7 @@ def interpolPolys(X, deg, T, abstime):
     Args
         X:   Matrix of the constraints Nconstr x Nwaypoinst
         deg: Degree of the polynomial to fit to describe the pieces
-        T: Knots points for the interpolation 
+        T: Knots points for the interpolation
         abstime: Flag to specify whether the t vector represents
                     durations or absolute time
 
@@ -52,7 +52,7 @@ def interpolPolys(X, deg, T, abstime):
 
     """
     nCoeff = deg + 1
-    [A, b] = buildInterpolationProblem(X, deg, T, abstime)
+    [A, b] = buildInterpolationProblem(X, deg, T, is_abstime = True)
 
     nullx = linalg.null_space(A)
 
@@ -62,14 +62,14 @@ def interpolPolys(X, deg, T, abstime):
 
     polys = np.zeros((npolys, nCoeff), dtype=float)
     for i in range(npolys):
-        polys[i,:] = sol[i * nCoeff: (i+1) * nCoeff]
+        polys[i, :] = sol[i * nCoeff: (i + 1) * nCoeff]
 
     return (sol, nullx, res, polys)
 
 
 ## =================================================
 ## =================================================
-def buildInterpolationProblem(X, deg, T, abstime):
+def buildInterpolationProblem(X, deg, T, is_abstime = True):
     """
     Build the interpolation problem A * x = b
 
@@ -104,7 +104,7 @@ def buildInterpolationProblem(X, deg, T, abstime):
     # Define the time vector
     Dt = np.zeros((nWp - 1), dtype=float)
 
-    if (abstime):
+    if (is_abstime):
         for i in range(len(T) - 1):
             Dt[i] = T[i+1] - T[i]
     else:
