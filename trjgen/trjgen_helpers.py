@@ -30,6 +30,7 @@ def TrajFromPW(Tv, derlist, pwpolx=None, pwpoly=None, pwpolz=None, pwpolw=None):
     Output
 
     """
+    G = 9.81
 
     if (pwpolx != None):
         X = pwh.pwpTo1D(Tv, pwpolx, derlist)
@@ -50,6 +51,10 @@ def TrajFromPW(Tv, derlist, pwpolx=None, pwpoly=None, pwpolz=None, pwpolw=None):
         W = pwh.pwpTo1D(Tv, pwpolw, derlist)
     else:
         W = np.zeros((len(derlist), len(Tv)))
+
+    if (np.array(derlist) == 2).any():
+        ACC = np.concatenate(([X[2,:]], [Y[2,:]], [Z[2,:] + G]), axis = 0)
+        Zb = (ACC / np.linalg.norm(ACC, axis = 0)) * 0.01
 
 
     for i in range(len(derlist)):
@@ -74,9 +79,12 @@ def TrajFromPW(Tv, derlist, pwpolx=None, pwpoly=None, pwpolz=None, pwpolw=None):
 
         p = ax.scatter(X[i, :], Y[i, :], Z[i, :], c = Tv)
         plt.colorbar(p)
+        if (derlist[i] == 0):
+            ax.quiver(X[i, :], Y[i, :], Z[i, :], Zb[0, :], Zb[1, :],\
+                             Zb[2,:])
         plt.show()
 
-    return (X, Y, Z, W)
+    return (X, Y, Z, W, Zb)
 
 ## =================================================
 ## =================================================
