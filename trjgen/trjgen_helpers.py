@@ -25,13 +25,15 @@ def TrajFromPW(Tv, derlist, pwpolx=None, pwpoly=None, pwpolz=None, pwpolw=None):
 
     Args
         Tv: Time vector
+        derlist: List of the order of derivatives to be evaluated
         pwpolx: Polynomial describing the position on the X
         pwpoly: Polynomial describing the position on the Y
         pwpolz: Polynomial describing the position on the Z
         pwpolw: Polynomial describing the position on the Yaw
-        derlist: List of the order of derivatives to be evaluated
 
     Output
+        X,Y,Z,W: Flat output trajectory
+        Zb: Vector along the Z body axis
 
     """
     G = 9.81
@@ -58,12 +60,35 @@ def TrajFromPW(Tv, derlist, pwpolx=None, pwpoly=None, pwpolz=None, pwpolw=None):
 
     if (np.array(derlist) == 2).any():
         ACC = np.concatenate(([X[2,:]], [Y[2,:]], [Z[2,:] + G]), axis = 0)
-        Zb = (ACC / np.linalg.norm(ACC, axis = 0)) * 0.01
+        Zb = (ACC / np.linalg.norm(ACC, axis = 0))
 
+    return (X, Y, Z, W, Zb)
+
+
+## =================================================
+## =================================================
+def plotTraj(X, Y, Z, W, Zb, Tv, derlist, scaleZb=0.01):
+    """
+    Plot the flat output trajectory as a scatter plot. The color of 
+    the plot is mapped on the time.
+    A quiver plot is superimposed to show the direction of the requested
+    thrust vector during the trajectory.
+
+    Args
+        X,Y,Z,W:    Flat output trajectory
+        Zb:         Vector along the Z body axis
+        Tv:         Time vector
+        derlist:    List of the order of derivatives to be evaluated
+        scaleZb:    Scaling factor to improve the visualization of the Zb vector
+                    direction
+
+    Output
+
+    """
 
     for i in range(len(derlist)):
         # Create the figure and axes
-        plt.figure(i)
+        plt.figure()
         ax = plt.axes(projection='3d')
         title_str = 'Derivative n = {:1d}'.format(derlist[i])
         print(title_str)
@@ -83,12 +108,13 @@ def TrajFromPW(Tv, derlist, pwpolx=None, pwpoly=None, pwpolz=None, pwpolw=None):
 
         p = ax.scatter(X[i, :], Y[i, :], Z[i, :], c = Tv)
         plt.colorbar(p)
+        Zb = Zb * scaleZb 
         if (derlist[i] == 0):
             ax.quiver(X[i, :], Y[i, :], Z[i, :], Zb[0, :], Zb[1, :],\
-                             Zb[2,:])
-        plt.show()
+                    Zb[2,:])
+            plt.show()
 
-    return (X, Y, Z, W, Zb)
+
 
 ## =================================================
 ## =================================================
