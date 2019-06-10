@@ -59,17 +59,11 @@ W = np.array([
 knots = np.array([0, 1.5, 3]) # One second each piece
 Dt = knots[1:len(knots)] - knots[0:len(knots)-1]
 
-# Compute the polynomials pieces
-(solx, nullx, resx, polysx) = tj.interpolPolys(X, ndeg, knots, True)
-(soly, nully, resy, polysy) = tj.interpolPolys(Y, ndeg, knots, True)
-(solz, nullz, resz, polysz) = tj.interpolPolys(Z, ndeg, knots, True)
-(solw, nullw, resw, polysw) = tj.interpolPolys(W, ndeg, knots, True)
-
-# Instantiate the Piecewise polynomials
-ppx = pw.PwPoly(polysx, knots)
-ppy = pw.PwPoly(polysy, knots)
-ppz = pw.PwPoly(polysz, knots)
-ppw = pw.PwPoly(polysw, knots)
+# Generate the polynomial
+ppx = pw.PwPoly(X, knots, ndeg)
+ppy = pw.PwPoly(Y, knots, ndeg)
+ppz = pw.PwPoly(Z, knots, ndeg)
+ppw = pw.PwPoly(W, knots, ndeg)
 
 # Check (Evaluate polynomial)
 tv = np.linspace(0,max(knots),100);

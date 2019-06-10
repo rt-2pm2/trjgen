@@ -8,15 +8,25 @@ Created on Fri Jun  7 18:11:29 2019
 import numpy as np
 import numpy.polynomial.polynomial as pl
 
+from trjgen import trjgen as trjg
 
 
 class PwPoly :
 
     ## Constructor
-    def __init__(self, coeff_m, knots):
+    def __init__(self, waypoints, knots, degree):
+
+        # Interpolation problem
+        (sol, null, _, coeff_m) = trjg.interpolPolys(waypoints, degree, knots, True)
+
+        # Solution vector of the polynomial coefficient (1 row)
+        self.coeff_v = np.array(sol)
+
+        # Base of the null space of the interpolation solution
+        self.null_b = np.array(null)
 
         # Matrix of polynomials coefficients
-        self.coeff = np.array(coeff_m)
+        self.coeff_m = np.array(coeff_m)
 
         # Number of pieces
         self.npieces = coeff_m.shape[0]
@@ -54,7 +64,7 @@ class PwPoly :
             for (k, t_) in enumerate(t):
                 i = self.find_piece(t_)
                 # Evaluate the required polynomial derivative
-                pder = pl.polyder(self.coeff[i, :], der)
+                pder = pl.polyder(self.coeff_m[i, :], der)
                 yout[k] = pl.polyval(t_ - self.knots[i], pder)
         except TypeError:
             # Non iterable: t is a single value
@@ -63,7 +73,7 @@ class PwPoly :
                         "the time support of the piecewise polynomial")
 
             i = self.find_piece(t)
-            pder = pl.polyder(self.coeff[i, :], der)
+            pder = pl.polyder(self.coeff_m[i, :], der)
             yout = pl.polyval(t - self.knots[i], pder)
 
         return yout
