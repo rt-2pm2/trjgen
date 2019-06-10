@@ -16,6 +16,15 @@ class PwPoly :
     ## Constructor
     def __init__(self, waypoints, knots, degree):
 
+        # Store the waypoints
+        self.wp = waypoints
+
+        # Knots (It's assumed that the knot of the first point is 0.0)
+        self.knots = np.array(knots)
+
+        # Degree of the polynomial
+        self.degree = degree
+
         # Interpolation problem
         (sol, null, _, coeff_m) = trjg.interpolPolys(waypoints, degree, knots, True)
 
@@ -30,13 +39,7 @@ class PwPoly :
 
         # Number of pieces
         self.npieces = coeff_m.shape[0]
-
-        # Knots (It's assumed that the knot of the first point is 0.0)
-        self.knots = np.array(knots)
-
-        # Degree of the polynomial
-        self.deg = coeff_m.shape[1] - 1
-
+ 
 
     # Evaluate the Piecewise polynomial
     def eval(self, t, der):
@@ -77,6 +80,88 @@ class PwPoly :
             yout = pl.polyval(t - self.knots[i], pder)
 
         return yout
+
+    def moveWps(self, new_waypoints):
+        """
+        Move the position of the waypoints
+        """
+        if (len(new_waypoints) != len(self.knots)):
+            print("The lenght of the waypoints list should not change")
+            return False;
+
+        # Store the waypoints
+        self.wp = new_waypoints 
+
+        # Interpolation problem
+        (sol, null, _, coeff_m) = trjg.interpolPolys(self.wp, self.degree, self.knots, True)
+       
+        # Update the data
+        # Solution vector of the polynomial coefficient (1 row)
+        self.coeff_v = np.array(sol)
+
+        # Base of the null space of the interpolation solution
+        self.null_b = np.array(null)
+
+        # Matrix of polynomials coefficients
+        self.coeff_m = np.array(coeff_m)
+
+        # Number of pieces
+        self.npieces = coeff_m.shape[0]
+
+        return True
+
+    def moveKnots(self, new_knots):
+        """
+        Move the position of the knots 
+        """
+        if (len(new_knots) != len(self.knots)):
+            print("The lenght of the knots list should not change")
+            return False;
+
+        # Knots update 
+        self.knots = np.array(new_knots)
+
+        # Interpolation problem
+        (sol, null, _, coeff_m) = trjg.interpolPolys(self.wp, self.degree, self.knots, True)
+       
+        # Update the data
+        # Solution vector of the polynomial coefficient (1 row)
+        self.coeff_v = np.array(sol)
+
+        # Base of the null space of the interpolation solution
+        self.null_b = np.array(null)
+
+        # Matrix of polynomials coefficients
+        self.coeff_m = np.array(coeff_m)
+
+        # Number of pieces
+        self.npieces = coeff_m.shape[0]
+
+        return True;
+
+    ## Function to retrieve values
+    
+    def getWaypoints(self):
+        """
+        Returns the waypoints of the piecewise polynomial
+        """
+        wp = self.wp
+        return np.array(wp)
+
+    def getKnots(self):
+        """
+        Returns the waypoints of the piecewise polynomial
+        """
+        knots = self.knots
+        return np.array(knots)
+
+    def getCoeff(self):
+        """
+        Returns the coefficients of the piecewise polynomial
+        """
+        coeff = self.coeff_m
+        return np.array(coeff)
+
 
     ## Private
     # Find the piece of the piecewies polynomial active at time t
