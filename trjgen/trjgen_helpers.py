@@ -7,7 +7,11 @@ Helper functions for trajectory generation and plotting
 import numpy as np
 import numpy.polynomial.polynomial as pl
 from mpl_toolkits.mplot3d import Axes3D
+
+import matplotlib
 from matplotlib import pyplot as plt
+
+matplotlib.use('qt5agg')
 
 # Import evaluation helper funcions for Piecewise polynomial
 from trjgen import pwpoly_helpers as pwh
