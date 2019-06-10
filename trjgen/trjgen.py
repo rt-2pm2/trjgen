@@ -52,7 +52,7 @@ def interpolPolys(X, deg, T, is_abstime):
 
     """
     nCoeff = deg + 1
-    [A, b] = buildInterpolationProblem(X, deg, T, is_abstime = True)
+    [A, b] = buildInterpolationProblem(X, deg, T, is_abstime)
 
     nullx = linalg.null_space(A)
 
@@ -159,13 +159,13 @@ def buildInterpolationProblem(X, deg, T, is_abstime = True):
 
 ## =================================================
 ## =================================================
-def pp2file(Dt, polysX, polysY, polysZ, filename):
+def pp2file(Dt, polysX, polysY, polysZ, polysW, filename):
     """
     Save the polynomial coefficients to file
     The file will have a row for each piece and the row has the
     following format:
 
-    Time_interval x_polynomial_coeff y_poly_coeff z_poly_coeff
+    Time_interval x_poly_coeff y_poly_coeff z_poly_coeff w_poly_coeff
 
     """
     f = open(filename, "w")
@@ -174,14 +174,18 @@ def pp2file(Dt, polysX, polysY, polysZ, filename):
     nPieces = polysX.shape[0]
     pollen = polysX.shape[1]
 
+    f.write('\n')
     for i in range(nPieces):
-        f.write('{:4f}, '.format(Dt[i]))
+        f.write('{:5f}, '.format(Dt[i]))
         for j in range(pollen):
-            f.write('{:4f}, '.format(polysX[i,j]))
+            f.write('{:5f}, '.format(polysX[i,j]))
         for j in range(pollen):
-            f.write('{:4f}, '.format(polysY[i,j]))
+            f.write('{:5f}, '.format(polysY[i,j]))
         for j in range(pollen):
-            f.write('{:4f}, '.format(polysZ[i,j]))
+            f.write('{:5f}, '.format(polysZ[i,j]))
+        for j in range(pollen):
+            f.write('{:5f}, '.format(polysW[i,j]))
+        f.write('\n')
 
     f.close()
 
