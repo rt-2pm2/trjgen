@@ -47,7 +47,7 @@ wps = ppx.getWaypoints()
 print("Waypoints: ", wps)
 knts = ppx.getKnots()
 print("Knots: ", knts)
-cfs = ppx.getCoeff()
+cfs = ppx.getCoeffMat()
 print("Coefficients: ", cfs)
 
 
@@ -55,7 +55,7 @@ print('\n')
 knots = np.array([0, 2, 3.5])
 print("Changing the knots position: ", knots)
 ppx.moveKnots(knots)
-cfs = ppx.getCoeff()
+cfs = ppx.getCoeffMat()
 print("Coefficients: ", cfs)
 
 X = np.array([
@@ -70,7 +70,7 @@ wps = ppx.getWaypoints()
 print("Waypoints: ", wps)
 knts = ppx.getKnots()
 print("Knots: ", knts)
-cfs = ppx.getCoeff()
+cfs = ppx.getCoeffMat()
 print("Coefficients: ", cfs)
 
 

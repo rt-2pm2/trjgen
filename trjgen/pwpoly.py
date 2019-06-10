@@ -155,13 +155,21 @@ class PwPoly :
         knots = self.knots
         return np.array(knots)
 
-    def getCoeff(self):
+    def getCoeffMat(self):
         """
         Returns the coefficients of the piecewise polynomial
+        as a matrix with each piece on a line
         """
         coeff = self.coeff_m
         return np.array(coeff)
 
+    def getCoeffVect(self):
+        """
+        Returns the coefficients of the piecewise polynomial
+        as a vector
+        """
+        coeff_v = self.coeff_v
+        return coeff_v
 
     ## Private
     # Find the piece of the piecewies polynomial active at time t
