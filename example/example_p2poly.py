@@ -10,7 +10,11 @@ sys.path.insert(0, '../trjgen')
 
 import numpy as np
 
+import plotly as py
+import plotly.graph_objs as go
+
 from trjgen import trjgen_helpers as tjh
+from trjgen import pltly_helpers as ply
 from trjgen import trjgen as tj
 from trjgen import pwpoly as pw
 
@@ -71,10 +75,8 @@ ppw = pw.PwPoly(W, knots, ndeg)
 
 # Check (Evaluate polynomial)
 tv = np.linspace(0,max(knots),100);
-(Xtj, Ytj, Ztj, Wtj, Zbtj) = tjh.TrajFromPW(tv, [0,1,2], pwpolx=ppx, \
-                                        pwpoly=ppy, pwpolz=ppz, pwpolw = ppw)
-# Evaluate the Thrust Margin
-(ffthrust, available_thrust) = tjh.plotThrustMargin(tv, Xtj, Ytj, Ztj, vehicle_mass, thust_thr)
+(Xtj, Ytj, Ztj, Wtj, Zbtj) = tjh.TrajFromPW(tv, [0,1,2], \
+        pwpolx=ppx, pwpoly=ppy, pwpolz=ppz, pwpolw = ppw)
 
 # Save the polynomial coefficients on file
 x_coeff = ppx.getCoeffMat(); 
@@ -85,4 +87,4 @@ w_coeff = ppy.getCoeffMat();
 Dt = knots[1:len(knots)] - knots[0:len(knots)-1]
 tj.pp2file(Dt, x_coeff, y_coeff, z_coeff, w_coeff, "./poly.txt")
 
-
+ply.TrajFromPW_plotly(Xtj, Ytj, Ztj, tv)
