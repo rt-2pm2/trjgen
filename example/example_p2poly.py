@@ -87,4 +87,6 @@ w_coeff = ppy.getCoeffMat();
 Dt = knots[1:len(knots)] - knots[0:len(knots)-1]
 tj.pp2file(Dt, x_coeff, y_coeff, z_coeff, w_coeff, "./poly.csv")
 
-ply.TrajFromPW_plotly(Xtj, Ytj, Ztj, tv)
+ply.plotTray_plotly(Xtj, Ytj, Ztj, tv)
+
+ply.plotThrustMargin(tv, Xtj, Ytj, Ztj, vehicle_mass, thust_thr)
