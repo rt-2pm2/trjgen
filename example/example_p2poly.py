@@ -37,8 +37,8 @@ print('Number of constraint on the flat output = {:d}.'.format(nconstr))
 
 # Build the constraint matrix
 X = np.array([
-        [ 0,     1.0,    0.6],
-        [ 0,     0.02,   0.0],
+        [ 0,     1.0,    0.5],
+        [ 0,     0.8,   0.0],
         [ 0,   -9.0,     0.0],
         [ 0,   np.nan,   0.0],
         ])
@@ -51,7 +51,7 @@ Y = np.array([
         ])
 
 Z = np.array([
-        [ 0,   0.0,     -0.3],
+        [ 0,   0.0,     -0.2],
         [ 0,   0.0,      0.0],
         [ 0,   0.0,      0.0],
         [ 0,   np.nan,   0.0],
@@ -79,14 +79,17 @@ tv = np.linspace(0,max(knots),100);
         pwpolx=ppx, pwpoly=ppy, pwpolz=ppz, pwpolw = ppw)
 
 # Save the polynomial coefficients on file
-x_coeff = ppx.getCoeffMat(); 
-y_coeff = ppy.getCoeffMat(); 
-z_coeff = ppz.getCoeffMat(); 
+x_coeff = ppx.getCoeffMat();
+y_coeff = ppy.getCoeffMat();
+z_coeff = ppz.getCoeffMat();
 w_coeff = ppy.getCoeffMat();
 
 Dt = knots[1:len(knots)] - knots[0:len(knots)-1]
 tj.pp2file(Dt, x_coeff, y_coeff, z_coeff, w_coeff, "./poly.csv")
 
-ply.plotTray_plotly(Xtj, Ytj, Ztj, tv)
+ply.plotZb_plotly(Xtj, Ytj, Ztj, Zbtj)
 
-ply.plotThrustMargin(tv, Xtj, Ytj, Ztj, vehicle_mass, thust_thr)
+#tjh.plotTraj(Xtj, Ytj, Ztj, Wtj, Zbtj, tv, [0,1,2],0.03)
+#ply.plotTray_plotly(Xtj, Ytj, Ztj, tv)
+
+#ply.plotThrustMargin(tv, Xtj, Ytj, Ztj, vehicle_mass, thust_thr)

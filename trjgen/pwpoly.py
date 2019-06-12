@@ -39,7 +39,7 @@ class PwPoly :
 
         # Number of pieces
         self.npieces = coeff_m.shape[0]
- 
+
 
     # Evaluate the Piecewise polynomial
     def eval(self, t, der):
@@ -90,11 +90,11 @@ class PwPoly :
             return False;
 
         # Store the waypoints
-        self.wp = new_waypoints 
+        self.wp = new_waypoints
 
         # Interpolation problem
         (sol, null, _, coeff_m) = trjg.interpolPolys(self.wp, self.degree, self.knots, True)
-       
+
         # Update the data
         # Solution vector of the polynomial coefficient (1 row)
         self.coeff_v = np.array(sol)
@@ -112,18 +112,18 @@ class PwPoly :
 
     def moveKnots(self, new_knots):
         """
-        Move the position of the knots 
+        Move the position of the knots
         """
         if (len(new_knots) != len(self.knots)):
             print("The lenght of the knots list should not change")
             return False;
 
-        # Knots update 
+        # Knots update
         self.knots = np.array(new_knots)
 
         # Interpolation problem
         (sol, null, _, coeff_m) = trjg.interpolPolys(self.wp, self.degree, self.knots, True)
-       
+
         # Update the data
         # Solution vector of the polynomial coefficient (1 row)
         self.coeff_v = np.array(sol)
@@ -140,7 +140,7 @@ class PwPoly :
         return True;
 
     ## Function to retrieve values
-    
+
     def getWaypoints(self):
         """
         Returns the waypoints of the piecewise polynomial

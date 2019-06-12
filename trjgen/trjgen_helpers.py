@@ -69,7 +69,7 @@ def TrajFromPW(Tv, derlist, pwpolx=None, pwpoly=None, pwpolz=None, pwpolw=None):
 ## =================================================
 def plotTraj(X, Y, Z, W, Zb, Tv, derlist, scaleZb=0.01):
     """
-    Plot the flat output trajectory as a scatter plot. The color of 
+    Plot the flat output trajectory as a scatter plot. The color of
     the plot is mapped on the time.
     A quiver plot is superimposed to show the direction of the requested
     thrust vector during the trajectory.
@@ -108,7 +108,7 @@ def plotTraj(X, Y, Z, W, Zb, Tv, derlist, scaleZb=0.01):
 
         p = ax.scatter(X[i, :], Y[i, :], Z[i, :], c = Tv)
         plt.colorbar(p)
-        Zb = Zb * scaleZb 
+        Zb = Zb * scaleZb
         if (derlist[i] == 0):
             ax.quiver(X[i, :], Y[i, :], Z[i, :], Zb[0, :], Zb[1, :],\
                     Zb[2,:])
@@ -147,6 +147,7 @@ def plotPoly3D(Dt, Nsamples, polx, poly, polz, derlist):
             ax.set_zlabel("z [m/s^2]")
 
         ax.scatter(X[i, :], Y[i, :], Z[i, :])
+        plt.gca().set_aspect('equal', adjustable='box')
         plt.show()
 
 def plotThrustMargin(T, X, Y, Z, vehicle_mass, thrust_constr):

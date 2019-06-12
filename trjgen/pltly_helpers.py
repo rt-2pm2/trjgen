@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Helper functions to plot with plotly/dash 
+Helper functions to plot with plotly/dash
 
 @author: rt-2pm2
 """
 
 import plotly as py
 import plotly.graph_objs as go
-import plotly.graph_objs.layout as gl 
+#import plotly.graph_objs.layout as gl
 
 from trjgen import trjgen_helpers as tjh
 
+
+## =================================================
+## =================================================
 def plotTray_plotly(X, Y, Z, t):
     trace1 = go.Scatter3d(
             x = X[0, :],
@@ -43,13 +46,44 @@ def plotTray_plotly(X, Y, Z, t):
                 ),
             scene={"aspectmode": "cube", "xaxis": {"title": f"x [m]", },
                        "yaxis": {"title": f"x [m]", },
-                       "zaxis": {"title": f"z [m]", }} 
+                       "zaxis": {"title": f"z [m]", }}
             )
     fig = go.Figure(data = data, layout = layout)
     py.offline.plot(fig, filename='3DPath')
 
 
+## =================================================
+## =================================================
+def plotZb_plotly(X, Y, Z, V):
+    data = [{
+            "type": "cone",
+            "x": X[0,:],
+            "y": Y[0,:],
+            "z": Z[0,:],
+            "u": V[0,:],
+            "v": V[1,:],
+            "w": V[2,:],
+            "sizemode": "absolute",
+            "colorscale": 'Blues',
+            "sizeref": 10000
+    }]
 
+    layout = go.Layout(
+            scene = dict(
+                    xaxis = dict(
+                        range = [-2,2],),
+                    yaxis = dict(
+                        range = [-2,2],),
+                    zaxis = dict(
+                        range = [0,2],),)
+            )
+
+    fig = go.Figure(data = data, layout = layout)
+    py.offline.plot(fig, filename='Zbody.html', validate=False)
+
+
+## =================================================
+## =================================================
 def plotThrustMargin(T, X, Y, Z, vehicle_mass, thrust_constr):
     """
     Plot the trajectory coordinates as a scatter plot evaluating also
@@ -83,11 +117,11 @@ def plotThrustMargin(T, X, Y, Z, vehicle_mass, thrust_constr):
             margin = dict( l = 0, r = 0, b = 0, t = 0),
             scene={"aspectmode": "cube", "xaxis": {"title": f"x [m]", },
                 "yaxis": {"title": f"x [m]", },
-                "zaxis": {"title": f"z [m]", }} 
+                "zaxis": {"title": f"z [m]", }}
             )
     fig = go.Figure(data = data, layout = layout)
     py.offline.plot(fig, filename='3DPathWithThrustMargin')
 
-    return 
+    return
 
 
