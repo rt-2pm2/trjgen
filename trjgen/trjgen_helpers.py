@@ -112,8 +112,8 @@ def plotTraj(X, Y, Z, W, Zb, Tv, derlist, scaleZb=0.01):
         if (derlist[i] == 0):
             ax.quiver(X[i, :], Y[i, :], Z[i, :], Zb[0, :], Zb[1, :],\
                     Zb[2,:])
-            plt.show()
-
+       
+        plt.show()
 
 
 ## =================================================
