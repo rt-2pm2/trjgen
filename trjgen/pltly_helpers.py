@@ -8,7 +8,6 @@ Helper functions to plot with plotly/dash
 
 import plotly as py
 import plotly.graph_objs as go
-#import plotly.graph_objs.layout as gl
 
 from trjgen import trjgen_helpers as tjh
 
@@ -44,12 +43,14 @@ def plotTray_plotly(X, Y, Z, t):
                 b = 0,
                 t = 0
                 ),
-            scene={"aspectmode": "cube", "xaxis": {"title": f"x [m]", },
-                       "yaxis": {"title": f"x [m]", },
-                       "zaxis": {"title": f"z [m]", }}
+            scene={"aspectmode": "data",
+                "xaxis": {"title": f"x [m]"},
+                "yaxis": {"title": f"y [m]"},
+                "zaxis": {"title": f"z [m]"}}
             )
+
     fig = go.Figure(data = data, layout = layout)
-    py.offline.plot(fig, filename='3DPath')
+    py.offline.plot(fig, 'traj.html')
 
 
 ## =================================================
@@ -67,19 +68,19 @@ def plotZb_plotly(X, Y, Z, V):
             "colorscale": 'Blues',
             "sizeref": 10000
     }]
-
+    
+    range = [0.0, 3.0]
     layout = go.Layout(
-            scene = dict(
-                    xaxis = dict(
-                        range = [-2,2],),
-                    yaxis = dict(
-                        range = [-2,2],),
-                    zaxis = dict(
-                        range = [0,2],),)
+            margin = dict( l = 0, r = 0, b = 0, t = 0),
+            scene={"aspectmode": "data",
+                "xaxis": {"title": f"x [m]"},
+                "yaxis": {"title": f"y [m]"},
+                "zaxis": {"title": f"z [m]"}}
+
             )
 
     fig = go.Figure(data = data, layout = layout)
-    py.offline.plot(fig, filename='Zbody.html', validate=False)
+    py.offline.plot(fig, 'z.html',validate=False)
 
 
 ## =================================================
@@ -115,12 +116,12 @@ def plotThrustMargin(T, X, Y, Z, vehicle_mass, thrust_constr):
     data = [trace1]
     layout = go.Layout(
             margin = dict( l = 0, r = 0, b = 0, t = 0),
-            scene={"aspectmode": "cube", "xaxis": {"title": f"x [m]", },
+            scene={"aspectmode": "data", "xaxis": {"title": f"x [m]", },
                 "yaxis": {"title": f"x [m]", },
                 "zaxis": {"title": f"z [m]", }}
             )
     fig = go.Figure(data = data, layout = layout)
-    py.offline.plot(fig, filename='3DPathWithThrustMargin')
+    py.offline.plot(fig)
 
     return
 
