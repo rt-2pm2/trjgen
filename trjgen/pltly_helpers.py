@@ -50,7 +50,7 @@ def plotTray_plotly(X, Y, Z, t):
             )
 
     fig = go.Figure(data = data, layout = layout)
-    py.offline.plot(fig, 'traj.html')
+    py.offline.plot(fig, filename='traj.html')
 
 
 ## =================================================
@@ -80,7 +80,7 @@ def plotZb_plotly(X, Y, Z, V):
             )
 
     fig = go.Figure(data = data, layout = layout)
-    py.offline.plot(fig, 'z.html',validate=False)
+    py.offline.plot(fig,validate=False)
 
 
 ## =================================================
@@ -121,7 +121,7 @@ def plotThrustMargin(T, X, Y, Z, vehicle_mass, thrust_constr):
                 "zaxis": {"title": f"z [m]", }}
             )
     fig = go.Figure(data = data, layout = layout)
-    py.offline.plot(fig)
+    py.offline.plot(fig, filename="thrust_marging.html")
 
     return
 
