@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Helper functions for trajectory generation and plotting
 
@@ -12,9 +14,6 @@ import matplotlib
 from matplotlib import pyplot as plt
 
 matplotlib.use('qt5agg')
-
-# Import evaluation helper funcions for Piecewise polynomial
-from trjgen import pwpoly_helpers as pwh
 
 ## =================================================
 ## =================================================
@@ -39,22 +38,22 @@ def TrajFromPW(Tv, derlist, pwpolx=None, pwpoly=None, pwpolz=None, pwpolw=None):
     G = 9.81
 
     if (pwpolx != None):
-        X = pwh.pwpTo1D(Tv, pwpolx, derlist)
+        X = pwpTo1D(Tv, pwpolx, derlist)
     else:
         X = np.zeros((len(derlist), len(Tv)))
 
     if (pwpoly != None):
-        Y = pwh.pwpTo1D(Tv, pwpoly, derlist)
+        Y = pwpTo1D(Tv, pwpoly, derlist)
     else:
         Y = np.zeros((len(derlist), len(Tv)))
 
     if (pwpolz != None):
-        Z = pwh.pwpTo1D(Tv, pwpolz, derlist)
+        Z = pwpTo1D(Tv, pwpolz, derlist)
     else:
         Z = np.zeros((len(derlist), len(Tv)))
 
     if (pwpolw != None):
-        W = pwh.pwpTo1D(Tv, pwpolw, derlist)
+        W = pwpTo1D(Tv, pwpolw, derlist)
     else:
         W = np.zeros((len(derlist), len(Tv)))
 
@@ -285,3 +284,34 @@ def getlimits(T, X, Y, Z, vehicle_mass, thrust_constr):
     available_thrust = thrust_constr - ffthrust
 
     return (ffthrust, available_thrust)
+
+
+## =================================================
+## =================================================
+def pwpTo1D(T, pwpoly, der):
+    """
+    Generate the 1D trajectory in space from polynomial
+
+    Args
+        T:      Vector of points where the polynomial is evaluated
+        pwpoly: Piecewise polynomial object
+        der:    Order of the derivatives to be evaluated
+
+    Outputs
+        X:      Vector/Matrix with the evaluated polynomial
+                NumDerivative x NumberOfPoints
+    """
+
+    # Check whether the input is a scalar
+    if type(der) == int:
+        der = [der]
+
+    der = np.array(der)
+    T = np.array(T)
+
+    X = np.zeros((der.size, T.size))
+
+    for i in range(der.size):
+        X[i,:] = pwpoly.eval(T, der[i])
+
+    return X
