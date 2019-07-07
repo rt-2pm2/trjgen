@@ -66,10 +66,11 @@ def plotZb_plotly(X, Y, Z, V):
             "w": V[2,:],
             "sizemode": "absolute",
             "colorscale": 'Blues',
+            "hoverinfo": "u+v+w",
             "sizeref": 10000
     }]
     
-    range = [0.0, 3.0]
+    #range = [0.0, 3.0]
     layout = go.Layout(
             margin = dict( l = 0, r = 0, b = 0, t = 0),
             scene={"aspectmode": "data",
