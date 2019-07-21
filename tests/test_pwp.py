@@ -14,7 +14,7 @@ import numpy as np
 
 from trjgen import trjgen_helpers as tjh
 from trjgen import trjgen as tj
-from trjgen import pwpoly as pw
+from trjgen import class_pwpoly as pw
 
 np.set_printoptions(precision=3)
 np.set_printoptions(suppress=True)
