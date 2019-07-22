@@ -8,6 +8,10 @@ Created on Fri Jun  7 18:11:29 2019
 import numpy as np
 import numpy.polynomial.polynomial as pl
 
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
+
 import trjgen.trjgen as trjg
 
 class PwPoly :

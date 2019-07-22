@@ -6,7 +6,8 @@ Created on Sat Jun  8 02:54:42 2019
 @author: rt-2pm2
 """
 import sys
-sys.path.insert(0, '../trjgen')
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import numpy as np
 

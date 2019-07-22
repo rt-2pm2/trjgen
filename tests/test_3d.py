@@ -8,8 +8,11 @@ Example with 3D trajectory
 """
 
 import numpy as np
-from  trjgen import trjgen as tj
-#from .context import trjgen
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import trjgen.trjgen as tj
 
 np.set_printoptions(precision=6)
 np.set_printoptions(suppress=True)

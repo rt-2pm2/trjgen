@@ -9,7 +9,7 @@ Helper functions to plot with plotly/dash
 import plotly as py
 import plotly.graph_objs as go
 
-from trjgen import trjgen_helpers as tjh
+import trjgen.trjgen_helpers as tjh
 
 
 ## =================================================

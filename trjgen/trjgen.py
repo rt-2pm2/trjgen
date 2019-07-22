@@ -26,7 +26,6 @@ import numpy as np
 import scipy.linalg as linalg
 
 
-
 ## =================================================
 ## =================================================
 def interpolPolys(X, deg, T, is_abstime):

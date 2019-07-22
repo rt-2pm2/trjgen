@@ -7,14 +7,13 @@ Test the functionality of the Piecewise polynomial class in "pwpoly.py"
 
 @author: rt-2pm2
 """
-import sys
-sys.path.insert(0, '../trjgen')
 
 import numpy as np
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from trjgen import trjgen_helpers as tjh
-from trjgen import trjgen as tj
-from trjgen import class_pwpoly as pw
+import trjgen.class_pwpoly as pw
 
 np.set_printoptions(precision=3)
 np.set_printoptions(suppress=True)
