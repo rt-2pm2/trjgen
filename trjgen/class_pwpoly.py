@@ -8,8 +8,7 @@ Created on Fri Jun  7 18:11:29 2019
 import numpy as np
 import numpy.polynomial.polynomial as pl
 
-from trjgen import trjgen as trjg
-
+import trjgen.trjgen as trjg
 
 class PwPoly :
 

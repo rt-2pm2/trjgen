@@ -13,10 +13,10 @@ import numpy as np
 import plotly as py
 import plotly.graph_objs as go
 
-from trjgen import trjgen_helpers as tjh
-from trjgen import pltly_helpers as ply
-from trjgen import trjgen as tj
-from trjgen import class_pwpoly as pw
+import trjgen.trjgen_helpers as tjh
+import trjgen.pltly_helpers as ply
+import trjgen.trjgen as tj
+import trjgen.class_pwpoly as pw
 
 np.set_printoptions(precision=6)
 np.set_printoptions(suppress=True)

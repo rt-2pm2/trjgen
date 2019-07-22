@@ -11,8 +11,8 @@ sys.path.insert(0, '../trjgen')
 import numpy as np
 from matplotlib import pyplot as plt
 
-from trjgen import trjgen as tj
-from trjgen import trjgen_helpers as tj_h
+import trjgen.trjgen as tj
+import trjgen.thjgen_helpers as tj_h
 
 np.set_printoptions(precision=6)
 np.set_printoptions(suppress=True)
