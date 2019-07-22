@@ -12,7 +12,7 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
 
-import trjgen.trjgen as trjg
+import trjgen.trjgen_core as trjg
 
 class PwPoly :
 

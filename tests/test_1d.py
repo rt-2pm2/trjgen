@@ -12,7 +12,7 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import trjgen.trjgen as tj
+import trjgen.trjgen_core as tj
 
 np.set_printoptions(precision=6)
 np.set_printoptions(suppress=True)

@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 import numpy as np
 from matplotlib import pyplot as plt
 
-import trjgen.trjgen as tj
+import trjgen.trjgen_core as tj
 import trjgen.trjgen_helpers as tj_h
 
 np.set_printoptions(precision=6)

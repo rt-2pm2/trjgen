@@ -16,7 +16,7 @@ import plotly.graph_objs as go
 
 import trjgen.trjgen_helpers as tjh
 import trjgen.pltly_helpers as ply
-import trjgen.trjgen as tj
+import trjgen.trjgen_core as tj
 import trjgen.class_pwpoly as pw
 
 np.set_printoptions(precision=6)
