@@ -6,17 +6,18 @@ Created on Sat Jun  8 02:54:42 2019
 @author: rt-2pm2
 """
 import sys
-sys.path.insert(0, '../trjgen')
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import numpy as np
 
 import plotly as py
 import plotly.graph_objs as go
 
-from trjgen import trjgen_helpers as tjh
-from trjgen import pltly_helpers as ply
-from trjgen import trjgen as tj
-from trjgen import pwpoly as pw
+import trjgen.trjgen_helpers as tjh
+import trjgen.pltly_helpers as ply
+import trjgen.trjgen_core as tj
+import trjgen.class_pwpoly as pw
 
 np.set_printoptions(precision=6)
 np.set_printoptions(suppress=True)
@@ -89,7 +90,8 @@ z_coeff = ppz.getCoeffMat();
 w_coeff = ppy.getCoeffMat();
 
 Dt = knots[1:len(knots)] - knots[0:len(knots)-1]
-tj.pp2file(Dt, x_coeff, y_coeff, z_coeff, w_coeff, "./poly.csv")
+tj.pp2file(Dt, x_coeff, y_coeff, z_coeff, w_coeff, "./wall.csv")
+tj.ppFromfile('./wall.csv')
 
 
 # Plotting
