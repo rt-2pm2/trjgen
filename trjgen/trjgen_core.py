@@ -24,6 +24,7 @@ Where X[i][j] is the requirement for the i-derivative of the j-th waypoint.
 """
 import numpy as np
 import scipy.linalg as linalg
+import csv
 
 
 ## =================================================
@@ -173,22 +174,73 @@ def pp2file(Dt, polysX, polysY, polysZ, polysW, filename):
     nPieces = polysX.shape[0]
     pollen = polysX.shape[1]
 
-    f.write('\n')
+    f.write('Pieces: ' + str(nPieces) + ', ' + 'Ncoef: ' + str(pollen) + '\n')
     for i in range(nPieces):
         f.write('{:5f}, '.format(Dt[i]))
         for j in range(pollen):
             f.write('{:5f}, '.format(polysX[i,j]))
         for j in range(pollen):
-            f.write('{:5f}, '.format(polysY[i,j]))
+            f.write('{:5f}, '.format(polysX[i,j]))
         for j in range(pollen):
-            f.write('{:5f}, '.format(polysZ[i,j]))
+            f.write('{:5f}, '.format(polysX[i,j]))
         for j in range(pollen):
-            f.write('{:5f}, '.format(polysW[i,j]))
+            if (j == pollen - 1):
+                f.write('{:5f}'.format(polysX[i,j]))
+            else:
+                f.write('{:5f}, '.format(polysX[i,j]))
         f.write('\n')
 
     f.close()
 
+def ppFromfile(filename):
+    """
+    Read the polynomial coefficients from a file 
+    The file will have a row for each piece and the row has the
+    following format:
 
+    Time_interval x_poly_coeff y_poly_coeff z_poly_coeff w_p ly_coeff
+
+    """
+    csvfile = open(filename, "r")
+
+    reader = csv.reader(csvfile, delimiter=',') 
+    
+    data = [];
+    for row in reader:
+        data.append(row)
+
+    # There is an extra initial row.
+    nPieces = len(data) - 1
+
+    # The first element is the time
+    pollen = int(len(data[1]) - 1)//4
+
+    print("Loading polynomial from file...");
+    print("Num Pieces: " + str(nPieces));
+    print("Num Coeff: " + str(pollen));
+
+    polysX = np.Zeros((nPieces, pollen), dtype=float);
+    polysY = np.Zeros((nPieces, pollen), dtype=float);
+    polysZ = np.Zeros((nPieces, pollen), dtype=float);
+    polysW = np.Zeros((nPieces, pollen), dtype=float);
+
+    for i in range(nPieces):
+        for j in range(pollen):
+            print(i);
+            print(j);
+            polysX[i,j] = data[i + 1][j + 1]
+            polysY[i,j] = data[i + 1][j + 1 + 8] 
+            polysZ[i,j] = data[i + 1][j + 1 + 16]
+            polysW[i,j] = data[i + 1][j + 1 + 24]
+
+    print("Imported polyX: \n" + polyX); 
+    print("Imported polyY: \n" + polyY); 
+    print("Imported polyZ: \n" + polyZ); 
+    print("Imported polyW: \n" + polyW); 
+
+    csvfile.close()
+
+    return (Dt, polysX, polysY, polysZ, polysW) 
 
 ######################################################################
 ## Helper functions for polynomial generation
