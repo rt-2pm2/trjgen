@@ -155,7 +155,7 @@ def plotThrustMargin(T, X, Y, Z, vehicle_mass, thrust_constr):
     the thrust margin available for maneuvers.
     """
 
-    (ffthrust, available_thrust) = getlimits(T, X, Y, Z, vehicle_mass, thrust_constr)
+    (ffthrust, available_thrust) = getlimits(X, Y, Z, vehicle_mass, thrust_constr)
 
     perc_available = (available_thrust / thrust_constr) * 100.0
     if ((X.shape[1] < 3) or (Y.shape[1] < 3) or (Z.shape[1] < 3)):
@@ -260,7 +260,7 @@ def polysTo3D(Dt, Nsamples, polysx, polysy, polysz, der):
 
 
 
-def getlimits(T, X, Y, Z, vehicle_mass, thrust_constr):
+def getlimits(X, Y, Z, vehicle_mass, thrust_constr):
     """
     Function that computes the thrust marging for a given trajectory
 
@@ -273,12 +273,17 @@ def getlimits(T, X, Y, Z, vehicle_mass, thrust_constr):
         print("The trajectory should contain at least acceleration")
         return 0
 
+    if (X.ndim > 1):
+        acc_x = np.expand_dims(X[2, :], axis=0)
+        acc_y = np.expand_dims(Y[2, :], axis=0)
+        acc_z = np.expand_dims(Z[2, :] + grav_acc, axis=0)
+        acc_v = np.concatenate((acc_x, acc_y, acc_z), axis = 0)
+    else:
+        acc_x = X[2]
+        acc_y = Y[2]
+        acc_z = Z[2]
+        acc_v = np.vstack((acc_x, acc_y, acc_z))
 
-    acc_x = np.expand_dims(X[2, :], axis=0)
-    acc_y = np.expand_dims(Y[2, :], axis=0)
-    acc_z = np.expand_dims(Z[2, :] + grav_acc, axis=0)
-
-    acc_v = np.concatenate((acc_x, acc_y, acc_z), axis = 0)
 
     ffthrust = vehicle_mass * (np.linalg.norm(acc_v, axis = 0, ord=2))
     available_thrust = thrust_constr - ffthrust
