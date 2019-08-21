@@ -55,9 +55,12 @@ W = np.array([
         [ 0,   np.nan,      0.0],
         ])
 
-# Times (Absolute and intervals)
-knots = np.array([0, 1.5, 3]) # One second each piece
+mid_time = 1.5
+end_time = 2.0
 
+# Times (Absolute and intervals)
+knots = np.array([0, mid_time, end_time]) # One second each piece
+Dt =  knots[1:3] - knots[0:2]
 # Generate the polynomial
 ppx = pw.PwPoly(X, knots, ndeg)
 ppy = pw.PwPoly(Y, knots, ndeg)
@@ -66,6 +69,15 @@ ppw = pw.PwPoly(W, knots, ndeg)
 
 traj = tr.Trajectory(ppx, ppy, ppz, ppw)
 
-print(traj.eval(1.5, [0,1,2]))
+print("Evaluating Trajectory in 0")
+print(traj.eval(0.0, [0]))
+
+print("\n")
+print("Evaluating trajectory at the end point:")
+print(traj.eval(end_time, [0,1,2]))
+
+traj.writeTofile(Dt, filename='./trjfile.csv')
+traj.readFromfile(filename='./trjfile.csv')
+print(traj.eval(end_time, [0,1,2]))
 
 

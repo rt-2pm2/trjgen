@@ -25,7 +25,7 @@ np.set_printoptions(suppress=True)
 
 # Vehicle Data
 vehicle_mass = 0.032
-thust_thr = 9.91 * 0.032 * 2.0
+thust_thr = 9.81 * 0.032 * 2.0
 
 # Polynomial characteristic:  order
 ndeg = 7

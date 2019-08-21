@@ -269,7 +269,7 @@ def getlimits(T, X, Y, Z, vehicle_mass, thrust_constr):
     grav_acc = 9.81
 
     # Check whether I have the acceleration data
-    if ((X.shape[1] < 3) or (Y.shape[1] < 3) or (Z.shape[1] < 3)):
+    if ((X.shape[0] < 3) or (Y.shape[0] < 3) or (Z.shape[0] < 3)):
         print("The trajectory should contain at least acceleration")
         return 0
 

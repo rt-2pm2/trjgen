@@ -91,10 +91,18 @@ w_coeff = ppy.getCoeffMat();
 
 Dt = knots[1:len(knots)] - knots[0:len(knots)-1]
 tj.pp2file(Dt, x_coeff, y_coeff, z_coeff, w_coeff, "./wall.csv")
+# 
+print("Exporting Polynomial")
+print("X_coeff")
+print(x_coeff);
+print("\nY_coeff")
+print(y_coeff);
+print("\nZ_coeff")
+print(z_coeff);
 tj.ppFromfile('./wall.csv')
 
 
 # Plotting
-ply.plotZb_plotly(Xtj, Ytj, Ztj, Zbtj)
-ply.plotTray_plotly(Xtj, Ytj, Ztj, tv)
-#ply.plotThrustMargin(tv, Xtj, Ytj, Ztj, vehicle_mass, thust_thr)
+#ply.plotZb_plotly(Xtj, Ytj, Ztj, Zbtj)
+#ply.plotTray_plotly(Xtj, Ytj, Ztj, tv)
+ply.plotThrustMargin(tv, Xtj, Ytj, Ztj, vehicle_mass, thust_thr)

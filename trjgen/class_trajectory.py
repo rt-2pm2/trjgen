@@ -4,6 +4,8 @@
 @author: rt-2pm2
 """
 import numpy as np
+import trjgen.trjgen_core as tj
+import trjgen.class_pwpoly as pwp
 
 class Trajectory:
     """ 
@@ -64,3 +66,37 @@ class Trajectory:
 
         return (X, Y, Z, W, R)
 
+    def writeTofile(self, Dt, filename='./trjfile.csv'):
+        # Save the polynomial coefficients on file
+        x_coeff = self.px.getCoeffMat();
+        y_coeff = self.py.getCoeffMat();
+        z_coeff = self.pz.getCoeffMat();
+        w_coeff = self.py.getCoeffMat();
+
+        print("Saving to file...")
+        print("X coeff:")
+        print(x_coeff)
+
+        print("\nY coeff:")
+        print(y_coeff)
+
+        print("\nZ coeff:")
+        print(z_coeff)
+
+        print("\nW coeff:")
+        print(w_coeff)
+        tj.pp2file(Dt, x_coeff, y_coeff, z_coeff, w_coeff, filename)
+
+    def readFromfile(self, filename='./poly.csv'):
+        (Dt, xcoeff, ycoeff, zcoeff, wcoeff) = tj.ppFromfile(filename)
+        px = pwp.PwPoly()
+        px.loadFromData(xcoeff, Dt, Dt.size)
+
+        py = pwp.PwPoly()
+        py.loadFromData(ycoeff, Dt, Dt.size)
+
+        pz = pwp.PwPoly()
+        pz.loadFromData(zcoeff, Dt, Dt.size)
+
+        pw = pwp.PwPoly()
+        pw.loadFromData(wcoeff, Dt, Dt.size)

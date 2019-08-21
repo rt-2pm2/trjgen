@@ -55,6 +55,15 @@ Z = np.array([
 (soly, nully, resy, polysy) = tj.interpolPolys(Y, ndeg, Dt, False)
 (solz, nullz, resz, polysz) = tj.interpolPolys(Z, ndeg, Dt, False)
 
+M1y = (np.matmul(np.matmul(nullx.transpose(), Q), nullx))
+M2y = -np.matmul(np.matmul(np.linalg.inv(M1y), nullx.transpose()), Q)
+vy = np.matmul(M2y, soly)
+
+M1y = (np.matmul(np.matmul(nullx.transpose(), Q), nullx))
+M2y = -np.matmul(np.matmul(np.linalg.inv(M1y), nullx.transpose()), Q)
+vy = np.matmul(M2y, soly)
+
+
 
 # Compute the trajectory from the polynomials
 (T, Xtj, Ytj, Ztj) = tj_h.polysTo3D(Dt, 100, polysx, polysy, polysz, [0,1,2])
