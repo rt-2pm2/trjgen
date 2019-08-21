@@ -71,13 +71,16 @@ traj = tr.Trajectory(ppx, ppy, ppz, ppw)
 
 print("Evaluating Trajectory in 0")
 print(traj.eval(0.0, [0]))
-
-print("\n")
-print("Evaluating trajectory at the end point:")
+print("Evaluating Trajectory at " + str(1.5))
+print(traj.eval(1.5, [0,1]))
+print("\nEvaluating trajectory at the end point")
 print(traj.eval(end_time, [0,1,2]))
 
 traj.writeTofile(Dt, filename='./trjfile.csv')
 traj.readFromfile(filename='./trjfile.csv')
+print("Evaluating loaded trajectory at" + str(1.5))
+print(traj.eval(1.5, [0,1]))
+print("\nEvaluating loaded trajectory at the end point")
 print(traj.eval(end_time, [0,1,2]))
 
 
