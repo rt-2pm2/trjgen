@@ -26,10 +26,11 @@ X = np.array([
         [ 0,  -4.5], # a
         ])
 
-x_cnstr = np.array([[-3.0, 3.0], [-2.0, 2.0], [-14.0, 14.0]])
+x_cnstr = np.array([[-3.0, 3.0], [-5.0, 5.0], [-4.5, 4.5]])
 
 # Generate the polynomial
-bz_x = bz.Bezier(waypoints=X, constraints=x_cnstr, degree=7)
+T = 4.0
+bz_x = bz.Bezier(waypoints=X, constraints=x_cnstr, degree=10, s=T)
 
 print("Evaluation of the bezier polynomial")
 print(bz_x.eval(1.0, [0,1,2]))
@@ -37,24 +38,23 @@ print(bz_x.eval(1.0, [0,1,2]))
 
 
 #### PLOT
-N = 50
+N = 100
 test_y = np.zeros((N, 3), dtype=float)
 t = np.zeros((N), dtype=float)
 
+Xtj = np.zeros((N, 3), dtype=float)
 for i in range(N):
-    t[i] = 1.0/N * i
-    test_y[i, :] = bz_x.eval(t[i], [0,1,2])
+    t[i] = T/(N - 1) * i
+    Xtj[i, :] = bz_x.eval(t[i], [0,1,2])
 
 fig, axs = plt.subplots(3, 1)
-axs[0].plot(t, test_y[:, 0], t, np.ones(N) * x_cnstr[0,0], t, np.ones(N) * x_cnstr[0,1])
+axs[0].plot(t, Xtj[:, 0], t, np.ones(N) * x_cnstr[0,0], t, np.ones(N) * x_cnstr[0,1], T, X[0,1], 'o')
 axs[0].set_title("p")
-
-axs[1].plot(t, test_y[:, 1], t, np.ones(N) * x_cnstr[1,0], t, np.ones(N) * x_cnstr[1,1])
+axs[1].plot(t, Xtj[:, 1], t, np.ones(N) * x_cnstr[1,0], t, np.ones(N) * x_cnstr[1,1], T, X[1,1], 'o')
 axs[1].set_title("v")
-
-axs[2].plot(t, test_y[:, 2], t, np.ones(N) * x_cnstr[2,0], t, np.ones(N) * x_cnstr[2,1])
+axs[2].plot(t, Xtj[:, 2], t, np.ones(N) * x_cnstr[2,0], t, np.ones(N) * x_cnstr[2,1], T, X[2,1], 'o')
 axs[2].set_title("a")
 
-
+plt.show()
 
 

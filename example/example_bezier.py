@@ -46,50 +46,66 @@ W = np.array([
         ])
 
 
-v_lim = 3.0
-a_lim = 14.0
+x_lim = 3.0
+v_lim = 5.0
+a_lim = 10.0
 
-x_cnstr = np.array([[-3.0, 3.0], [-v_lim, v_lim], [-a_lim, a_lim]])
-y_cnstr = np.array([[-3.0, 3.0], [-v_lim, v_lim], [-a_lim, a_lim]])
-z_cnstr = np.array([[-0.3, 1.0], [-v_lim, v_lim], [-a_lim, a_lim]])
+x_cnstr = np.array([[-x_lim, x_lim], [-v_lim, v_lim], [-a_lim, a_lim]])
+y_cnstr = np.array([[-x_lim, x_lim], [-v_lim, v_lim], [-a_lim, a_lim]])
+z_cnstr = np.array([[-0.5, 1.5], [-v_lim, v_lim], [-a_lim, a_lim]])
 w_cnstr = np.array([[0.0, 1.2],  [-v_lim, v_lim], [-a_lim, a_lim]])
 
 # Generate the polynomial
-bz_x = bz.Bezier(waypoints=X, constraints=x_cnstr, degree=18)
-bz_y = bz.Bezier(waypoints=Y, constraints=y_cnstr, degree=18)
-bz_z = bz.Bezier(waypoints=Z, constraints=z_cnstr, degree=18)
-bz_w = bz.Bezier(waypoints=W, constraints=w_cnstr, degree=5)
+T = 4.0
+bz_x = bz.Bezier(waypoints=X, constraints=x_cnstr, degree=10, s=T)
+bz_y = bz.Bezier(waypoints=Y, constraints=y_cnstr, degree=10, s=T)
+bz_z = bz.Bezier(waypoints=Z, constraints=z_cnstr, degree=15, s=T)
+bz_w = bz.Bezier(waypoints=W, constraints=w_cnstr, degree=5, s=T)
 
 Curve = bz_t.BezierCurve(bz_x, bz_y, bz_z, bz_w)
 
 
-print("Evaluation of the bezier polynomial")
-print(bz_x.eval(1.0, [0,1,2]))
-print(bz_y.eval(1.0, [0,1,2]))
-print(bz_z.eval(1.0, [0,1,2]))
-
-
-
-
 #### PLOT
-N = 20
-test_y = np.zeros((N, 3), dtype=float)
+N = 50
+Xtj = np.zeros((N, 3), dtype=float)
+Ytj = np.zeros((N, 3), dtype=float)
+Ztj = np.zeros((N, 3), dtype=float)
+
+
 t = np.zeros((N), dtype=float)
 
 for i in range(N):
-    t[i] = 1.0/N * i
-    test_y[i, :] = bz_x.eval(t[i], [0,1,2])
+    t[i] = T/(N - 1) * i
+    (Xtj[i, :], Ytj[i, :], Ztj[i, :], _, _, _) = Curve.eval(t[i], [0,1,2])
 
-fig, axs = plt.subplots(3, 1)
-axs[0].plot(t, test_y[:, 0], t, np.ones(N) * x_cnstr[0,0], t, np.ones(N) * x_cnstr[0,1])
-axs[0].set_title("p")
 
-axs[1].plot(t, test_y[:, 1], t, np.ones(N) * x_cnstr[1,0], t, np.ones(N) * x_cnstr[1,1])
-axs[1].set_title("v")
 
-axs[2].plot(t, test_y[:, 2], t, np.ones(N) * x_cnstr[2,0], t, np.ones(N) * x_cnstr[2,1])
-axs[2].set_title("a")
+fig, axs_x = plt.subplots(3, 1)
+axs_x[0].plot(t, Xtj[:, 0], t, np.ones(N) * x_cnstr[0,0], t, np.ones(N) * x_cnstr[0,1], T, X[0,1], 'o')
+axs_x[0].set_title("p")
+axs_x[1].plot(t, Xtj[:, 1], t, np.ones(N) * x_cnstr[1,0], t, np.ones(N) * x_cnstr[1,1], T, X[1,1], 'o')
+axs_x[1].set_title("v")
+axs_x[2].plot(t, Xtj[:, 2], t, np.ones(N) * x_cnstr[2,0], t, np.ones(N) * x_cnstr[2,1], T, X[2,1], 'o')
+axs_x[2].set_title("a")
 
+
+fig, axs_y = plt.subplots(3, 1)
+axs_y[0].plot(t, Ytj[:, 0], t, np.ones(N) * y_cnstr[0,0], t, np.ones(N) * y_cnstr[0,1], T, Y[0,1], 'o')
+axs_y[0].set_title("p")                                                                                  
+axs_y[1].plot(t, Ytj[:, 1], t, np.ones(N) * y_cnstr[1,0], t, np.ones(N) * y_cnstr[1,1], T, Y[1,1], 'o')
+axs_y[1].set_title("v")                                                                                  
+axs_y[2].plot(t, Ytj[:, 2], t, np.ones(N) * y_cnstr[2,0], t, np.ones(N) * y_cnstr[2,1], T, Y[2,1], 'o')
+axs_y[2].set_title("a")
+
+fig, axs_z = plt.subplots(3, 1)
+axs_z[0].plot(t, Ztj[:, 0], t, np.ones(N) * z_cnstr[0,0], t, np.ones(N) * z_cnstr[0,1], T, Z[0,1], 'o')
+axs_z[0].set_title("p")                                                                                
+axs_z[1].plot(t, Ztj[:, 1], t, np.ones(N) * z_cnstr[1,0], t, np.ones(N) * z_cnstr[1,1], T, Z[1,1], 'o')
+axs_z[1].set_title("v")                                                                                
+axs_z[2].plot(t, Ztj[:, 2], t, np.ones(N) * z_cnstr[2,0], t, np.ones(N) * z_cnstr[2,1], T, Z[2,1], 'o')
+axs_z[2].set_title("a")
+
+plt.show()
 
 
 

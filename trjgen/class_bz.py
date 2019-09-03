@@ -12,7 +12,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '.'))
 
 import trjgen.trjgen_core as trj_core
 
-
 ## =================================================
 ## =================================================
 # Generate the Pascal Matrix
@@ -29,6 +28,9 @@ def genPascal(N):
     return P
 
 def genBezierM(deg):
+    """
+    Generate the matrix of binomial coefficients
+    """
     N = deg + 1
     PascalM = genPascal(N)
     BM = np.zeros((N,N), dtype=float)
@@ -40,26 +42,39 @@ def genBezierM(deg):
                 BM[i, j] = -1.0 * PascalM[N-1, i] * PascalM[i, j]
     return BM
 
-def genConstrM(deg, der):
+def genConstrM(deg, der, s=1.0):
+    """
+    Generate the matrix which maps position control points
+    into velocity and acceleration control points
+    """
     Nctrp = deg + 1
     O = np.eye(Nctrp - der, Nctrp)
 
     if (der == 1):
+        # v_i = n * (x_i - x_(i - 1))
+        # -1  1  0  0
+        #  0 -1  1  0
+        #  0  0 -1  1
+        #
         tempO = np.eye(Nctrp - der, Nctrp, k = 1)
-        O = (O - tempO) * deg
+        O = (tempO - O) * deg / s
 
     if (der == 2):
+        # a_i = n * (n - 1) * (x_i - 2 x_(i - 1) + x_(i - 2))
+        # 1 -2  1  0  0
+        # 0  1 -2  1  0
+        # 0  0  1 -2  1
         tempO = np.eye(Nctrp - der, Nctrp, k = 1)
         O = O - 2.0 * tempO
 
         tempO = np.eye(Nctrp - der, Nctrp, k = 2)
-        O = (O + tempO) * deg * (deg - 1)
+        O = (O + tempO) * deg * (deg - 1) / s**2
 
     return O
 
 
 
-def buildInterpolationProblem(X, deg):
+def buildInterpolationProblem(X, deg, s=1.0):
     """
     #Build the interpolation problem A * x = b
 
@@ -75,7 +90,7 @@ def buildInterpolationProblem(X, deg):
     nCoef = deg + 1        # Number of coefficient to describe each polynomial
     nConstr = X.shape[0]   # Number of constraints (flat outputs)
     nWp = X.shape[1]       # Number of waypoints
-    nEq = nConstr * 2      # Number of equations 
+    nEq = nConstr * 2      # Number of equations
 
     print("Degree of the Bezier curve = " + str(deg))
     print("Number of control points = " + str(nCoef))
@@ -89,12 +104,12 @@ def buildInterpolationProblem(X, deg):
     # Define the time vector
     Dt = np.ones((nWp - 1), dtype=float)
 
-    # The bezier polynomial can be represented using the 
+    # The bezier polynomial can be represented using the
     # standard polynomial power basis [1 t t^2 ...].
-    # In this form it is written as T * M, where T is the 
-    # power basis vector and M is a matrix with binomial 
+    # In this form it is written as T * M, where T is the
+    # power basis vector and M is a matrix with binomial
     # coefficients.
-    
+
     M = genBezierM(deg)
 
     counter = 0;
@@ -102,16 +117,19 @@ def buildInterpolationProblem(X, deg):
         for j in range(nConstr):
             if (i == 0):
                 b[counter] = X[j, i]
-                v = trj_core.polyder(trj_core.t_vec(0, deg), j)
+                v = trj_core.polyder(trj_core.t_vec(0, deg), j) / s**j
                 A[counter, :] = np.matmul(v, M)
             else:
                 b[counter] = X[j,i]
-                v = trj_core.polyder(trj_core.t_vec(Dt[i-1], deg), j)
+                v = trj_core.polyder(trj_core.t_vec(Dt[i-1], deg), j) / s**j
                 A[counter, :] = np.matmul(v, M)
             counter = counter + 1
     return (A,b)
 
 
+
+def costFun0(x):
+    return 1.0;
 
 def costFun(x):
     """
@@ -119,7 +137,7 @@ def costFun(x):
     """
     deg = x.size - 1
     M = genBezierM(deg)
-    Q = trj_core.genQ([1.0], deg, 4)
+    Q = trj_core.genQ([1.0], deg, 2)
 
     Q = M.transpose() * Q * M
 
@@ -130,7 +148,7 @@ def costFun(x):
 def bz_jac(x):
     deg = x.size - 1
     M = genBezierM(deg)
-    Q = trj_core.genQ([1.0], deg, 4)
+    Q = trj_core.genQ([1.0], deg, 2)
 
     Q = M.transpose() * Q * M
 
@@ -139,19 +157,18 @@ def bz_jac(x):
 def bz_hess(x):
     deg = x.size - 1
     M = genBezierM(deg)
-    Q = trj_core.genQ([1.0], deg, 4)
+    Q = trj_core.genQ([1.0], deg, 2)
     return 2.0 * M.transpose() * Q * M
 
 
-def genBezier(wp, constr, deg):
+def genBezier(wp, constr, deg, s=1.0):
     """
     wp: Matrix Nder x Npoints
     constr: Nder x [lb ub]
     """
     nCoeff = deg + 1
-    nConstr = constr.shape[0]
 
-    (A, b) = buildInterpolationProblem(wp, deg)
+    (A, b) = buildInterpolationProblem(wp, deg, s)
 
     # Build the constraint list
     lin_constr = []
@@ -160,24 +177,25 @@ def genBezier(wp, constr, deg):
     lin_constr = np.append(lin_constr, LinearConstraint(A, b, b))
 
     # Limit Constraints
-    for i in range(nConstr):
-            CM = genConstrM(deg, i)
+    if (constr is not None):
+        nConstr = constr.shape[0]
+        for i in range(nConstr):
+            CM = genConstrM(deg, i, s)
             clow = np.ones(CM.shape[0]) * constr[i, 0]
             cup  = np.ones(CM.shape[0]) * constr[i, 1]
-
             lin_constr = np.append(lin_constr, LinearConstraint(CM, clow, cup))
 
     x0 = np.zeros((nCoeff), dtype=float)
-    res = minimize(costFun, x0, method='trust-constr', constraints=lin_constr, options={'verbose':1})
+    res = minimize(costFun, x0, method='trust-constr', jac=bz_jac, hess=bz_hess, constraints=lin_constr, options={'verbose':1})
 
-    return res
+    return (res, A, b)
 
 
 
 class Bezier :
 
     ## Constructor
-    def __init__(self, cntp=None, waypoints=None, constraints=None, degree=None):
+    def __init__(self, cntp=None, waypoints=None, constraints=None, degree=None, s=1.0):
         # Asking for interpolation
         if (waypoints is not None and degree is not None):
             # Store the waypoints
@@ -189,11 +207,11 @@ class Bezier :
             # Degree of the polynomial
             self.degree = degree
 
-            # Interpolation problem
-            sol = genBezier(self.wp, self.cnstr, self.degree)
+            # Timespan
+            self.s = s
 
-            print("Control Points:")
-            print(sol.x)
+            # Interpolation problem
+            (sol, A, b) = genBezier(self.wp, self.cnstr, self.degree, self.s)
 
             # Control points of the bezier curve
             self.cntp = np.array(sol.x)
@@ -213,6 +231,7 @@ class Bezier :
             der derivative to evaluate
         """
 
+        t = t / self.s
         if (t < 0.0) or (t > 1.0):
             print("Warning!  to evaluate outside " +
                     "the time support of the Bezier polynomial")
@@ -228,7 +247,7 @@ class Bezier :
         t_der = np.zeros((N_der, t_.size))
         yout = np.zeros(N_der)
         for d in range(N_der):
-            t_der[d, :] = trj_core.polyder(t_, der[d])
+            t_der[d, :] = trj_core.polyder(t_, der[d]) / self.s**der[d]
             yout[d] = np.matmul(np.matmul(t_der[d,:], M), self.cntp)
 
         return yout
@@ -247,26 +266,8 @@ class Bezier :
         """
         Returns the control points of the Bezier polynomial
         """
-        coeff = self.coeff_m
+        coeff = self.cntp
         return np.array(coeff)
-
-    def getCoeffVect(self):
-        """
-        Returns the coefficients of the piecewise polynomial
-        as a vector
-        """
-        coeff_v = self.coeff_v
-        return coeff_v
-
-    def loadFromData(self, M, Dt, npieces):
-        """
-        Load the polynomial from data
-        """
-        pass
-
-
-
-
 
 
 
