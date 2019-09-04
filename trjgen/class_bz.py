@@ -195,7 +195,8 @@ def genBezier(wp, constr, costFun, jac, deg, s=1.0):
             lin_constr = np.append(lin_constr, ineq_cons_down)
 
 
-    x0 = np.linspace(0, 1, nCoeff) * wp[0,1] 
+    #x0 = np.linspace(0, 1, nCoeff) * wp[0,1] 
+    x0 = np.random.rand(nCoeff)
     res = minimize(costFun, x0, method='SLSQP', jac=jac, 
             constraints=lin_constr, options={'disp':True})
 
