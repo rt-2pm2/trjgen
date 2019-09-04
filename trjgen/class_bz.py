@@ -131,28 +131,6 @@ def buildInterpolationProblem(X, deg, s=1.0):
 def costFun0(x):
     return 1.0;
 
-def costFun(x):
-    """
-    Generate the const function for the optimization problem
-    """
-    deg = x.size - 1
-    M = genBezierM(deg)
-    Q = trj_core.genQ([1.0], deg, 2)
-
-    Q = M.transpose() * Q * M
-
-    cost = np.matmul(x, Q).dot(x)
-
-    return cost
-
-def bz_jac(x):
-    deg = x.size - 1
-    M = genBezierM(deg)
-    Q = trj_core.genQ([1.0], deg, 2)
-
-    Q = M.transpose() * Q * M
-
-    return 2.0 * np.matmul(x, Q)
 
 def bz_hess(x):
     deg = x.size - 1
@@ -161,7 +139,7 @@ def bz_hess(x):
     return 2.0 * M.transpose() * Q * M
 
 
-def genBezier(wp, constr, deg, s=1.0):
+def genBezier(wp, constr, costFun, jac, deg, s=1.0):
     """
     wp: Matrix Nder x Npoints
     constr: Nder x [lb ub]
@@ -173,8 +151,29 @@ def genBezier(wp, constr, deg, s=1.0):
     # Build the constraint list
     lin_constr = []
 
+#    # Interpolation Constraints
+#    lin_constr = np.append(lin_constr, LinearConstraint(A, b, b))
+#
+#    # Limit Constraints
+#    if (constr is not None):
+#        nConstr = constr.shape[0]
+#        for i in range(nConstr):
+#            CM = genConstrM(deg, i, s)
+#            clow = np.ones(CM.shape[0]) * constr[i, 0]
+#            cup  = np.ones(CM.shape[0]) * constr[i, 1]
+#            lin_constr = np.append(lin_constr, LinearConstraint(CM, clow, cup))
+#
+#    x0 = np.zeros((nCoeff), dtype=float)
+#    res = minimize(costFun, x0, method='trust-constr', jac=bz_jac, hess=bz_hess, constraints=lin_constr, options={'verbose':1})
+#
     # Interpolation Constraints
-    lin_constr = np.append(lin_constr, LinearConstraint(A, b, b))
+    eq_cons = {'type': 'eq',
+            'fun': lambda x: np.matmul(A,x) - b,
+            'jac': lambda x: A
+            }
+
+    #lin_constr = np.append(lin_constr, LinearConstraint(A, b, b))
+    lin_constr = np.append(lin_constr, eq_cons)
 
     # Limit Constraints
     if (constr is not None):
@@ -183,10 +182,22 @@ def genBezier(wp, constr, deg, s=1.0):
             CM = genConstrM(deg, i, s)
             clow = np.ones(CM.shape[0]) * constr[i, 0]
             cup  = np.ones(CM.shape[0]) * constr[i, 1]
-            lin_constr = np.append(lin_constr, LinearConstraint(CM, clow, cup))
+            #lin_constr = np.append(lin_constr, LinearConstraint(CM, clow, cup))
+            ineq_cons_up = {'type': 'ineq',
+                'fun': lambda x: -np.matmul(CM, x) + cup,
+                'jac': lambda x: -1.0 * CM,
+                }
+            ineq_cons_down = {'type': 'ineq',
+                    'fun': lambda x: np.matmul(CM, x) - clow,
+                    'jac': lambda x: CM,
+                    }
+            lin_constr = np.append(lin_constr, ineq_cons_up)
+            lin_constr = np.append(lin_constr, ineq_cons_down)
 
-    x0 = np.zeros((nCoeff), dtype=float)
-    res = minimize(costFun, x0, method='trust-constr', jac=bz_jac, hess=bz_hess, constraints=lin_constr, options={'verbose':1})
+
+    x0 = np.linspace(0, 1, nCoeff) * wp[0,1] 
+    res = minimize(costFun, x0, method='SLSQP', jac=jac, 
+            constraints=lin_constr, options={'disp':True})
 
     return (res, A, b)
 
@@ -210,8 +221,14 @@ class Bezier :
             # Timespan
             self.s = s
 
+            M = genBezierM(self.degree)
+            Q = trj_core.genQ([self.s], self.degree, 4)
+            Q = Q 
+            self.Q = M.transpose() * Q * M
+            self.Q = (self.Q / np.max(self.Q))
+
             # Interpolation problem
-            (sol, A, b) = genBezier(self.wp, self.cnstr, self.degree, self.s)
+            (sol, A, b) = genBezier(self.wp, self.cnstr, self.costFun, self.bz_jac, self.degree, self.s)
 
             # Control points of the bezier curve
             self.cntp = np.array(sol.x)
@@ -269,5 +286,14 @@ class Bezier :
         coeff = self.cntp
         return np.array(coeff)
 
+    def costFun(self, x):
+        """
+        Generate the const function for the optimization problem
+        """
+        cost = np.matmul(x, self.Q).dot(x) 
+        return cost
+
+    def bz_jac(self, x): 
+        return 2.0 * np.matmul(x, self.Q)
 
 
