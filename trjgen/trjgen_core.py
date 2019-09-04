@@ -26,6 +26,15 @@ import numpy as np
 import scipy.linalg as linalg
 import csv
 
+def null_space(A, atol=1e-13, rtol=0):
+    A = np.atleast_2d(A)
+    u, s, vh = linalg.svd(A)
+    tol = max(atol, rtol * s[0])
+    nnz = (s >= tol).sum()
+    ns = vh[nnz:].conj().T
+    return ns
+
+
 
 ## =================================================
 ## =================================================
@@ -57,7 +66,10 @@ def interpolPolys(X, deg, T, is_abstime):
 
     [A, b] = buildInterpolationProblem(X, deg, T, is_abstime)
 
-    nullx = linalg.null_space(A)
+    nullx = null_space(A)
+    if (nullx.size == 0):
+        print("Null space is void")
+
 
     # Define the time vector
     Dt = np.zeros((nWp - 1), dtype=float)
