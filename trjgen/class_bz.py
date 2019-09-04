@@ -4,7 +4,7 @@ Bezier Polynomial
 """
 import numpy as np
 from scipy.optimize import minimize
-from scipy.optimize import LinearConstraint
+#from scipy.optimize import LinearConstraint
 
 import sys
 import os
