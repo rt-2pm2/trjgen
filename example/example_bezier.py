@@ -20,24 +20,23 @@ import trjgen.pltly_helpers as ply
 np.set_printoptions(precision=6)
 np.set_printoptions(suppress=True)
 
-
 # Build the waypoint matrix
 X = np.array([
-        [ 0,  2.0], # p
-        [ 0,  0.84], # v
-        [ 0,  -4.5], # a
+        [ 0,  1.28], # p
+        [ 0,  0.05], # v
+        [ 0,  -0.6], # a
         ])
 
 Y = np.array([
-        [ 0,  -2.86], # p
-        [ 0,  -1.27], # v
-        [ 0,  6.75], # a
+        [ 0,  -2.25], # p
+        [ 0,  -0.71], # v
+        [ 0,  8.03], # a
         ])
 
 Z = np.array([
         [ 0,  0.05], # p
-        [ 0,  -0.23], # v
-        [ 0,  -5.86], # a
+        [ 0,  -0.36], # v
+        [ 0,  -5.79], # a
             ])
 
 W = np.array([
@@ -60,7 +59,7 @@ w_cnstr = np.array([[0.0, 1.2],  [-v_lim, v_lim], [-a_lim, a_lim]])
 T = 4.0
 bz_x = bz.Bezier(waypoints=X, constraints=x_cnstr, degree=10, s=T)
 bz_y = bz.Bezier(waypoints=Y, constraints=y_cnstr, degree=10, s=T)
-bz_z = bz.Bezier(waypoints=Z, constraints=z_cnstr, degree=15, s=T)
+bz_z = bz.Bezier(waypoints=Z, constraints=z_cnstr, degree=10, s=T)
 bz_w = bz.Bezier(waypoints=W, constraints=w_cnstr, degree=5, s=T)
 
 Curve = bz_t.BezierCurve(bz_x, bz_y, bz_z, bz_w)
@@ -81,35 +80,35 @@ for i in range(N):
     (Xtj[i, :], Ytj[i, :], Ztj[i, :], _, R, _) = Curve.eval(t[i], [0,1,2])
     Zbtj[i, :] = R[:, 2]/np.linalg.norm(R[:,2])
 
-#ply.plotTray_plotly(Xtj.transpose(), Ytj.transpose(), Ztj.transpose(), t)
-ply.plotZb_plotly(Xtj.transpose(), Ytj.transpose(), Ztj.transpose(), Zbtj.transpose())
+ply.plotTray_plotly(Xtj.transpose(), Ytj.transpose(), Ztj.transpose(), t)
+#ply.plotZb_plotly(Xtj.transpose(), Ytj.transpose(), Ztj.transpose(), Zbtj.transpose())
 
-#
-#fig, axs_x = plt.subplots(3, 1)
-#axs_x[0].plot(t, Xtj[:, 0], t, np.ones(N) * x_cnstr[0,0], t, np.ones(N) * x_cnstr[0,1], T, X[0,1], 'o')
-#axs_x[0].set_title("p")
-#axs_x[1].plot(t, Xtj[:, 1], t, np.ones(N) * x_cnstr[1,0], t, np.ones(N) * x_cnstr[1,1], T, X[1,1], 'o')
-#axs_x[1].set_title("v")
-#axs_x[2].plot(t, Xtj[:, 2], t, np.ones(N) * x_cnstr[2,0], t, np.ones(N) * x_cnstr[2,1], T, X[2,1], 'o')
-#axs_x[2].set_title("a")
-#
-#
-#fig, axs_y = plt.subplots(3, 1)
-#axs_y[0].plot(t, Ytj[:, 0], t, np.ones(N) * y_cnstr[0,0], t, np.ones(N) * y_cnstr[0,1], T, Y[0,1], 'o')
-#axs_y[0].set_title("p")                                                                                  
-#axs_y[1].plot(t, Ytj[:, 1], t, np.ones(N) * y_cnstr[1,0], t, np.ones(N) * y_cnstr[1,1], T, Y[1,1], 'o')
-#axs_y[1].set_title("v")                                                                                  
-#axs_y[2].plot(t, Ytj[:, 2], t, np.ones(N) * y_cnstr[2,0], t, np.ones(N) * y_cnstr[2,1], T, Y[2,1], 'o')
-#axs_y[2].set_title("a")
-#
-#fig, axs_z = plt.subplots(3, 1)
-#axs_z[0].plot(t, Ztj[:, 0], t, np.ones(N) * z_cnstr[0,0], t, np.ones(N) * z_cnstr[0,1], T, Z[0,1], 'o')
-#axs_z[0].set_title("p")                                                                                
-#axs_z[1].plot(t, Ztj[:, 1], t, np.ones(N) * z_cnstr[1,0], t, np.ones(N) * z_cnstr[1,1], T, Z[1,1], 'o')
-#axs_z[1].set_title("v")                                                                                
-#axs_z[2].plot(t, Ztj[:, 2], t, np.ones(N) * z_cnstr[2,0], t, np.ones(N) * z_cnstr[2,1], T, Z[2,1], 'o')
-#axs_z[2].set_title("a")
-#
+
+fig, axs_x = plt.subplots(3, 1)
+axs_x[0].plot(t, Xtj[:, 0], t, np.ones(N) * x_cnstr[0,0], t, np.ones(N) * x_cnstr[0,1], T, X[0,1], 'o')
+axs_x[0].set_title("p")
+axs_x[1].plot(t, Xtj[:, 1], t, np.ones(N) * x_cnstr[1,0], t, np.ones(N) * x_cnstr[1,1], T, X[1,1], 'o')
+axs_x[1].set_title("v")
+axs_x[2].plot(t, Xtj[:, 2], t, np.ones(N) * x_cnstr[2,0], t, np.ones(N) * x_cnstr[2,1], T, X[2,1], 'o')
+axs_x[2].set_title("a")
+
+
+fig, axs_y = plt.subplots(3, 1)
+axs_y[0].plot(t, Ytj[:, 0], t, np.ones(N) * y_cnstr[0,0], t, np.ones(N) * y_cnstr[0,1], T, Y[0,1], 'o')
+axs_y[0].set_title("p")                                                                                  
+axs_y[1].plot(t, Ytj[:, 1], t, np.ones(N) * y_cnstr[1,0], t, np.ones(N) * y_cnstr[1,1], T, Y[1,1], 'o')
+axs_y[1].set_title("v")                                                                                  
+axs_y[2].plot(t, Ytj[:, 2], t, np.ones(N) * y_cnstr[2,0], t, np.ones(N) * y_cnstr[2,1], T, Y[2,1], 'o')
+axs_y[2].set_title("a")
+
+fig, axs_z = plt.subplots(3, 1)
+axs_z[0].plot(t, Ztj[:, 0], t, np.ones(N) * z_cnstr[0,0], t, np.ones(N) * z_cnstr[0,1], T, Z[0,1], 'o')
+axs_z[0].set_title("p")                                                                                
+axs_z[1].plot(t, Ztj[:, 1], t, np.ones(N) * z_cnstr[1,0], t, np.ones(N) * z_cnstr[1,1], T, Z[1,1], 'o')
+axs_z[1].set_title("v")                                                                                
+axs_z[2].plot(t, Ztj[:, 2], t, np.ones(N) * z_cnstr[2,0], t, np.ones(N) * z_cnstr[2,1], T, Z[2,1], 'o')
+axs_z[2].set_title("a")
+
 plt.show()
 
 
