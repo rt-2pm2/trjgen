@@ -47,7 +47,7 @@ class PwPoly :
 
 
     # Evaluate the Piecewise polynomial
-    def eval(self, t, der):
+    def eval(self, t, der=np.array([0])):
         """
         Evaluate the piecewise polynomial
 

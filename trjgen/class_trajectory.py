@@ -22,7 +22,7 @@ class Trajectory:
 
     ## Evaluate the trajectory at a time 't' over a list
     ## of derivative 'derlist'
-    def eval(self, t, derlist):
+    def eval(self, t, derlist=[0, 1, 2]):
         # Check whether the input is a scalar
         if type(derlist) == int:
             der = [derlist]

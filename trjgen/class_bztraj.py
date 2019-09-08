@@ -16,6 +16,7 @@ class BezierCurve:
         self.py = py
         self.pz = pz
         self.pw = pw
+        self.duration = self.px.duration
 
 
     ## Evaluate the trajectory at a time 't' over a list

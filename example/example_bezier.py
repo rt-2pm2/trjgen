@@ -17,26 +17,30 @@ import trjgen.class_bz as bz
 import trjgen.class_bztraj as bz_t
 import trjgen.pltly_helpers as ply
 
+import time
+
 np.set_printoptions(precision=6)
 np.set_printoptions(suppress=True)
 
+plt.close('all')
+
 # Build the waypoint matrix
 X = np.array([
-        [ 0,  1.28], # p
-        [ 0,  0.05], # v
-        [ 0,  -0.6], # a
+        [ 0,  -0.469], # p
+        [ 0,  -0.044], # v
+        [ 0,  0.219], # a
         ])
 
 Y = np.array([
-        [ 0,  -2.25], # p
-        [ 0,  -0.71], # v
-        [ 0,  8.03], # a
+        [ 0,  -2.61], # p
+        [ 0,  -1.139], # v
+        [ 0,  5.696], # a
         ])
 
 Z = np.array([
-        [ 0,  0.05], # p
-        [ 0,  -0.36], # v
-        [ 0,  -5.79], # a
+        [ 0,  0.073], # p
+        [ 0,  -0.374], # v
+        [ 0,  -7.939], # a
             ])
 
 W = np.array([
@@ -48,19 +52,23 @@ W = np.array([
 
 x_lim = 3.0
 v_lim = 5.0
-a_lim = 10.0
+a_lim = 8.0
 
 x_cnstr = np.array([[-x_lim, x_lim], [-v_lim, v_lim], [-a_lim, a_lim]])
 y_cnstr = np.array([[-x_lim, x_lim], [-v_lim, v_lim], [-a_lim, a_lim]])
-z_cnstr = np.array([[-0.5, 1.5], [-v_lim, v_lim], [-a_lim, a_lim]])
-w_cnstr = np.array([[0.0, 1.2],  [-v_lim, v_lim], [-a_lim, a_lim]])
+z_cnstr = np.array([[-0.1, 0.1], [-v_lim, v_lim], [-a_lim, a_lim]])
+w_cnstr = np.array([[-1.2, 1.2],  [-v_lim, v_lim], [-a_lim, a_lim]])
 
 # Generate the polynomial
-T = 4.0
-bz_x = bz.Bezier(waypoints=X, constraints=x_cnstr, degree=10, s=T)
-bz_y = bz.Bezier(waypoints=Y, constraints=y_cnstr, degree=10, s=T)
-bz_z = bz.Bezier(waypoints=Z, constraints=z_cnstr, degree=10, s=T)
-bz_w = bz.Bezier(waypoints=W, constraints=w_cnstr, degree=5, s=T)
+tstart = time.time()
+T = 4.5
+bz_x = bz.Bezier(waypoints=X, constraints=x_cnstr, degree=15, s=T)
+bz_y = bz.Bezier(waypoints=Y, constraints=y_cnstr, degree=15, s=T)
+bz_z = bz.Bezier(waypoints=Z, constraints=z_cnstr, degree=15, s=T)
+bz_w = bz.Bezier(waypoints=W, constraints=w_cnstr, degree=7, s=T)
+elapsed = time.time() - tstart
+
+print("Elapsed time: ", elapsed)
 
 Curve = bz_t.BezierCurve(bz_x, bz_y, bz_z, bz_w)
 
@@ -95,17 +103,17 @@ axs_x[2].set_title("a")
 
 fig, axs_y = plt.subplots(3, 1)
 axs_y[0].plot(t, Ytj[:, 0], t, np.ones(N) * y_cnstr[0,0], t, np.ones(N) * y_cnstr[0,1], T, Y[0,1], 'o')
-axs_y[0].set_title("p")                                                                                  
+axs_y[0].set_title("p")
 axs_y[1].plot(t, Ytj[:, 1], t, np.ones(N) * y_cnstr[1,0], t, np.ones(N) * y_cnstr[1,1], T, Y[1,1], 'o')
-axs_y[1].set_title("v")                                                                                  
+axs_y[1].set_title("v")
 axs_y[2].plot(t, Ytj[:, 2], t, np.ones(N) * y_cnstr[2,0], t, np.ones(N) * y_cnstr[2,1], T, Y[2,1], 'o')
 axs_y[2].set_title("a")
 
 fig, axs_z = plt.subplots(3, 1)
 axs_z[0].plot(t, Ztj[:, 0], t, np.ones(N) * z_cnstr[0,0], t, np.ones(N) * z_cnstr[0,1], T, Z[0,1], 'o')
-axs_z[0].set_title("p")                                                                                
+axs_z[0].set_title("p")
 axs_z[1].plot(t, Ztj[:, 1], t, np.ones(N) * z_cnstr[1,0], t, np.ones(N) * z_cnstr[1,1], T, Z[1,1], 'o')
-axs_z[1].set_title("v")                                                                                
+axs_z[1].set_title("v")
 axs_z[2].plot(t, Ztj[:, 2], t, np.ones(N) * z_cnstr[2,0], t, np.ones(N) * z_cnstr[2,1], T, Z[2,1], 'o')
 axs_z[2].set_title("a")
 

@@ -10,6 +10,8 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
 
+from cvxopt import matrix, solvers
+
 import trjgen.trjgen_core as trj_core
 
 ## =================================================
@@ -139,6 +141,55 @@ def bz_hess(x):
     return 2.0 * M.transpose() * Q * M
 
 
+
+def genBezierCVX(wp, constr, Q, deg, s=1.0):
+    nCoeff = deg + 1
+    
+    done = False
+    iterations = 0;
+    s0 = s
+    while ( not done and iterations < 1): 
+        (A, b) = buildInterpolationProblem(wp, deg, s)
+
+        # Define CVX objects
+        Acvx = matrix(A)
+        bcvx = matrix(b)
+        Qcvx = matrix(Q)
+    
+        G = np.empty(shape=(0, deg + 1))
+        h = [] 
+        if (constr is not None):
+            nConstr = constr.shape[0]
+            for i in range(nConstr):
+                CM = genConstrM(deg, i, s)
+                G =  np.vstack((G, -CM, CM)) 
+
+                clow = np.ones(CM.shape[0]) * constr[i, 0]
+                cup  = np.ones(CM.shape[0]) * constr[i, 1]
+                h = np.concatenate((h, -clow, cup))
+        else:
+            G = np.zeros((deg+1, deg+1))
+            h = np.zeros(deg+1)
+
+        Gcvx = matrix(G)
+        hcvx = matrix(h)
+
+        sol = solvers.qp(Qcvx, matrix(np.zeros(deg+1)) ,Gcvx , hcvx, Acvx, bcvx)
+        
+        if sol["status"] == 'optimal':
+            print("Solution:")
+            print(np.max(np.matmul(genConstrM(deg, 2, s),sol["x"])))
+            done = True
+        else:
+            print("Trying another solution")
+            s = s0 + (np.random.rand(1) - 0.5) * s0 + 1.5
+            print("Time to go: %.3f \n"%s)
+            iterations = iterations + 1
+
+    return (sol, A, b)
+
+
+
 def genBezier(wp, constr, costFun, jac, deg, s=1.0):
     """
     wp: Matrix Nder x Npoints
@@ -184,7 +235,7 @@ def genBezier(wp, constr, costFun, jac, deg, s=1.0):
             cup  = np.ones(CM.shape[0]) * constr[i, 1]
             #lin_constr = np.append(lin_constr, LinearConstraint(CM, clow, cup))
             ineq_cons_up = {'type': 'ineq',
-                'fun': lambda x: -np.matmul(CM, x) + cup,
+                'fun': lambda x: np.matmul(-1.0 * CM, x) + cup,
                 'jac': lambda x: -1.0 * CM,
                 }
             ineq_cons_down = {'type': 'ineq',
@@ -195,9 +246,9 @@ def genBezier(wp, constr, costFun, jac, deg, s=1.0):
             lin_constr = np.append(lin_constr, ineq_cons_down)
 
 
-    #x0 = np.linspace(0, 1, nCoeff) * wp[0,1] 
-    x0 = np.random.rand(nCoeff)
-    res = minimize(costFun, x0, method='SLSQP', jac=jac, 
+    x0 = np.linspace(0, 1, nCoeff) * wp[0,1]
+    #x0 = np.random.rand(nCoeff) / 10.0
+    res = minimize(costFun, x0, method='SLSQP', jac=jac,
             constraints=lin_constr, options={'disp':True})
 
     return (res, A, b)
@@ -220,19 +271,21 @@ class Bezier :
             self.degree = degree
 
             # Timespan
-            self.s = s
+            self.duration = s
 
             M = genBezierM(self.degree)
-            Q = trj_core.genQ([self.s], self.degree, 4)
-            Q = Q 
+            Q = trj_core.genQ([self.duration], self.degree, 4)
+            Q = Q
             self.Q = M.transpose() * Q * M
             self.Q = (self.Q / np.max(self.Q))
 
             # Interpolation problem
-            (sol, A, b) = genBezier(self.wp, self.cnstr, self.costFun, self.bz_jac, self.degree, self.s)
-
+            #(sol, A, b) = genBezier(self.wp, self.cnstr, self.costFun, self.bz_jac, self.degree, self.duration)
+            (sol, A, b) = genBezierCVX(self.wp, self.cnstr, self.Q, self.degree, self.duration)
+            
             # Control points of the bezier curve
-            self.cntp = np.array(sol.x)
+            #self.cntp = np.array(sol.x)
+            self.cntp = np.array(sol["x"])
 
         elif (cntp is not None):
             self.cntp = cntp
@@ -249,7 +302,7 @@ class Bezier :
             der derivative to evaluate
         """
 
-        t = t / self.s
+        t = t / self.duration
         if (t < 0.0) or (t > 1.0):
             print("Warning!  to evaluate outside " +
                     "the time support of the Bezier polynomial")
@@ -265,13 +318,13 @@ class Bezier :
         t_der = np.zeros((N_der, t_.size))
         yout = np.zeros(N_der)
         for d in range(N_der):
-            t_der[d, :] = trj_core.polyder(t_, der[d]) / self.s**der[d]
+            t_der[d, :] = trj_core.polyder(t_, der[d]) / self.duration**der[d]
             yout[d] = np.matmul(np.matmul(t_der[d,:], M), self.cntp)
 
         return yout
 
 
-    ## Function to retrieve values
+    ## Function to retrieve valuesCOBYLACOBYLA
 
     def getWaypoints(self):
         """
@@ -291,10 +344,10 @@ class Bezier :
         """
         Generate the const function for the optimization problem
         """
-        cost = np.matmul(x, self.Q).dot(x) 
+        cost = np.matmul(x, self.Q).dot(x)
         return cost
 
-    def bz_jac(self, x): 
+    def bz_jac(self, x):
         return 2.0 * np.matmul(x, self.Q)
 
 
