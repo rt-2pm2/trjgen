@@ -57,7 +57,8 @@ class BezierCurve:
 
             # Find the demanded Zb axis
             Zb = (Thrust / np.linalg.norm(Thrust))
-
+            #print("Thrust = ", Thrust)
+            #print("Zb = ", Zb)
             X_w = np.array((np.cos(W[0]), np.sin(W[0])))
             Yb = np.cross(Zb, X_w)
             Yb = Yb / np.linalg.norm(Yb)

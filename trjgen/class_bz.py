@@ -137,7 +137,7 @@ def costFun0(x):
 def bz_hess(x):
     deg = x.size - 1
     M = genBezierM(deg)
-    Q = trj_core.genQ([1.0], deg, 2)
+    Q = trj_core.genQ([1.0], deg, 4)
     return 2.0 * M.transpose() * Q * M
 
 
@@ -150,12 +150,14 @@ def genBezierCVX(wp, constr, Q, deg, s=1.0):
     s0 = s
     while ( not done and iterations < 1): 
         (A, b) = buildInterpolationProblem(wp, deg, s)
-
+        #print(A)
+        #print(b)
         # Define CVX objects
         Acvx = matrix(A)
         bcvx = matrix(b)
+
         Qcvx = matrix(Q)
-    
+
         G = np.empty(shape=(0, deg + 1))
         h = [] 
         if (constr is not None):
@@ -174,6 +176,7 @@ def genBezierCVX(wp, constr, Q, deg, s=1.0):
         Gcvx = matrix(G)
         hcvx = matrix(h)
 
+        solvers.options["abstol"] = 1e-5
         sol = solvers.qp(Qcvx, matrix(np.zeros(deg+1)) ,Gcvx , hcvx, Acvx, bcvx)
         
         if sol["status"] == 'optimal':
@@ -181,9 +184,10 @@ def genBezierCVX(wp, constr, Q, deg, s=1.0):
             print(np.max(np.matmul(genConstrM(deg, 2, s),sol["x"])))
             done = True
         else:
+            print(sol['status'])
             print("Trying another solution")
-            s = s0 + (np.random.rand(1) - 0.5) * s0 + 1.5
-            print("Time to go: %.3f \n"%s)
+            #s = s0 + (np.random.rand(1) - 0.5) * s0 + 1.5
+            #print("Time to go: %.3f \n"%s)
             iterations = iterations + 1
 
     return (sol, A, b)
