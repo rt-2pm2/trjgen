@@ -65,7 +65,8 @@ class PwPoly :
             nsamples = t.size
             if (t[0] < 0.0) or (t[nsamples - 1] > self.knots[-1]):
                 print("PwPoly.eval(): Trying to evaluate outside " +
-                        "the time support of the piecewise polynomial")
+                        "the time support of the piecewise polynomial\n" +
+                        "t_max = {}, t = {}".format(self.knots[-1], t[nsamples - 1]))
 
             # Allocate the variable
             yout = np.zeros((nsamples), dtype = float)
