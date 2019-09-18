@@ -178,16 +178,20 @@ def genBezierCVX(wp, constr, Q, deg, s=1.0):
 
         solvers.options["abstol"] = 1e-5
         sol = solvers.qp(Qcvx, matrix(np.zeros(deg+1)) ,Gcvx , hcvx, Acvx, bcvx)
-        
+         
         if sol["status"] == 'optimal':
             print("Solution:")
             print(np.max(np.matmul(genConstrM(deg, 2, s),sol["x"])))
             done = True
         else:
             print(sol['status'])
-            print("Trying another solution")
-            #s = s0 + (np.random.rand(1) - 0.5) * s0 + 1.5
-            #print("Time to go: %.3f \n"%s)
+            sol["x"] = np.matmul(np.linalg.pinv(A), b)
+            print("Min squared solution: ", sol["x"])
+
+            print(np.max(np.matmul(genConstrM(deg, 0, s),sol["x"])))
+            print(np.max(np.matmul(genConstrM(deg, 1, s),sol["x"])))
+            print(np.max(np.matmul(genConstrM(deg, 2, s),sol["x"])))
+
             iterations = iterations + 1
 
     return (sol, A, b)
