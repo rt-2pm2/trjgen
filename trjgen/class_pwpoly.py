@@ -78,8 +78,9 @@ class PwPoly :
         except TypeError:
             # Non iterable: t is a single value
             if (t < 0.0) or (t > self.knots[-1]):
-                print("Warning! PwPoly.eval(): Trying to evaluate outside " +
-                        "the time support of the piecewise polynomial")
+                print("PwPoly.eval(): Trying to evaluate outside " +
+                        "the time support of the piecewise polynomial\n" +
+                        "t_max = {}, t = {}".format(self.knots[-1], t))
 
             i = self.find_piece(t)
             pder = pl.polyder(self.coeff_m[i, :], der)
