@@ -181,16 +181,22 @@ def genBezierCVX(wp, constr, Q, deg, s=1.0):
          
         if sol["status"] == 'optimal':
             print("Solution:")
-            print(np.max(np.matmul(genConstrM(deg, 2, s),sol["x"])))
+            print((np.matmul(genConstrM(deg, 2, s), sol["x"])).max())
+            print("Printing  Control Points of the solution")
+            print(np.matmul(genConstrM(deg, 0, s), sol["x"]))
+            print(np.matmul(genConstrM(deg, 1, s), sol["x"]))
+            print(np.matmul(genConstrM(deg, 2, s), sol["x"]))
+
             done = True
         else:
             print(sol['status'])
             sol["x"] = np.matmul(np.linalg.pinv(A), b)
             print("Min squared solution: ", sol["x"])
 
-            print(np.max(np.matmul(genConstrM(deg, 0, s),sol["x"])))
-            print(np.max(np.matmul(genConstrM(deg, 1, s),sol["x"])))
-            print(np.max(np.matmul(genConstrM(deg, 2, s),sol["x"])))
+            print("Printing  Control Points of the solution")
+            print(np.matmul(genConstrM(deg, 0, s),sol["x"]))
+            print(np.matmul(genConstrM(deg, 1, s),sol["x"]))
+            print(np.matmul(genConstrM(deg, 2, s),sol["x"]))
 
             iterations = iterations + 1
 
@@ -264,7 +270,6 @@ def genBezier(wp, constr, costFun, jac, deg, s=1.0):
 
 
 class Bezier :
-
     ## Constructor
     def __init__(self, cntp=None, waypoints=None, constraints=None, degree=None, s=1.0):
         # Asking for interpolation
@@ -283,7 +288,7 @@ class Bezier :
 
             M = genBezierM(self.degree)
             Q = trj_core.genQ([self.duration], self.degree, 4)
-            Q = Q
+
             self.Q = M.transpose() * Q * M
             self.Q = (self.Q / np.max(self.Q))
 
