@@ -21,16 +21,16 @@ np.set_printoptions(suppress=True)
 
 # Build the waypoint matrix
 X = np.array([
-        [ 0,  2.0], # p
-        [ 0,  0.84], # v
-        [ 0,  -4.5], # a
+        [ 0,  0.5], # p
+        [ 0,  2.5], # v
+        [ 0,  -9.5], # a
         ])
 
-x_cnstr = np.array([[-3.0, 3.0], [-5.0, 5.0], [-4.5, 4.5]])
+x_cnstr = np.array([[-0.5, 1.0], [-5.0, 5.0], [-10.0, 5.0]])
 
 # Generate the polynomial
-T = 4.0
-bz_x = bz.Bezier(waypoints=X, constraints=x_cnstr, degree=10, s=T)
+T = 2.5
+bz_x = bz.Bezier(waypoints=X, constraints=x_cnstr, degree=16, s=T)
 
 print("Evaluation of the bezier polynomial")
 print(bz_x.eval(1.0, [0,1,2]))
