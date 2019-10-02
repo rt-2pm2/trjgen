@@ -150,13 +150,14 @@ def genBezierCVX(wp, constr, Q, deg, s=1.0):
     s0 = s
     while ( not done and iterations < 1): 
         (A, b) = buildInterpolationProblem(wp, deg, s)
-        #print(A)
-        #print(b)
+        #print("A = \n", A)
+        #print("b = \n", b)
         # Define CVX objects
         Acvx = matrix(A)
         bcvx = matrix(b)
 
         Qcvx = matrix(Q)
+        #Qcvx = matrix(np.eye(deg+1))
 
         G = np.empty(shape=(0, deg + 1))
         h = [] 
@@ -173,6 +174,8 @@ def genBezierCVX(wp, constr, Q, deg, s=1.0):
             G = np.zeros((deg+1, deg+1))
             h = np.zeros(deg+1)
 
+        #print("G = \n", G)
+        #print("h = \n", h)
         Gcvx = matrix(G)
         hcvx = matrix(h)
 
@@ -318,9 +321,11 @@ class Bezier :
         t = t / self.duration
         if (t < 0.0) or (t > 1.0):
             print("Warning!  to evaluate outside " +
-                    "the time support of the Bezier polynomial")
-            return np.nan
-
+                    "the time support of the Bezier polynomial: ", t * self.duration)
+            if (t < 0.0):
+                t = 0.0
+            else:
+                t = 1.0
         # Create the time vector and the derivatives
         N_der = len(der)
 
