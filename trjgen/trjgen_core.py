@@ -233,8 +233,8 @@ def genQ(Dt, deg, der):
         T = polyder(t_, der)
         TT = np.outer(T, T);
         # Compute the integral
-        for i in range(deg - der):
-            for j in range(deg - der):
+        for i in range(deg + 1 - der):
+            for j in range(deg + 1 - der):
                 TT[i + der][j + der] = (TT[i + der][j + der]) * Dt[k]/(i + j + 1)
         
         Q[deg * k: deg * (k  + 1) + 1, deg * k: deg * (k  + 1) + 1] = TT 
