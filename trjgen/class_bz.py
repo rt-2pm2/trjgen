@@ -44,34 +44,65 @@ def genBezierM(deg):
                 BM[i, j] = -1.0 * PascalM[N-1, i] * PascalM[i, j]
     return BM
 
+
+def genBaseDM(Nctrp):
+    DM = - np.eye(Nctrp - 1, Nctrp) + np.eye(Nctrp - 1, Nctrp, k = 1)
+    return DM
+
+def genDM(deg, der):
+    Nctrp = deg + 1
+   
+    if (der == 0):
+        return np.eye(Nctrp)
+
+    # Starting matrix for the first derivative.
+    DM = genBaseDM(Nctrp) * deg
+
+    for d in range(1, der):
+        #The range start from 1 to (der - 1)
+        DM_ = genBaseDM(Nctrp - d)
+        DM = np.matmul(DM_, DM) * (deg - d)
+
+    return DM 
+
 def genConstrM(deg, der, s=1.0):
     """
     Generate the matrix which maps position control points
     into velocity and acceleration control points
     """
-    Nctrp = deg + 1
-    O = np.eye(Nctrp - der, Nctrp)
-
-    if (der == 1):
-        # v_i = n * (x_i - x_(i - 1))
-        # -1  1  0  0
-        #  0 -1  1  0
-        #  0  0 -1  1
-        #
-        tempO = np.eye(Nctrp - der, Nctrp, k = 1)
-        O = (tempO - O) * deg / s
-
-    if (der == 2):
-        # a_i = n * (n - 1) * (x_i - 2 x_(i - 1) + x_(i - 2))
-        # 1 -2  1  0  0
-        # 0  1 -2  1  0
-        # 0  0  1 -2  1
-        tempO = np.eye(Nctrp - der, Nctrp, k = 1)
-        O = O - 2.0 * tempO
-
-        tempO = np.eye(Nctrp - der, Nctrp, k = 2)
-        O = (O + tempO) * deg * (deg - 1) / s**2
-
+#    Nctrp = deg + 1
+#    O = np.eye(Nctrp - der, Nctrp)
+#    if (der == 1):
+#        # v_i = n * (x_i - x_(i - 1))
+#        # -1  1  0  0
+#        #  0 -1  1  0
+#        #  0  0 -1  1
+#        #
+#        tempO = np.eye(Nctrp - der, Nctrp, k = 1)
+#        O = (tempO - O) * deg / s
+#
+#    if (der == 2):
+#        # a_i = n * (n - 1) * (x_i - 2 x_(i - 1) + x_(i - 2))
+#        # 1 -2  1  0  0
+#        # 0  1 -2  1  0
+#        # 0  0  1 -2  1
+#        tempO = np.eye(Nctrp - der, Nctrp, k = 1)
+#        O = O - 2.0 * tempO
+#
+#        tempO = np.eye(Nctrp - der, Nctrp, k = 2)
+#        O = (O + tempO) * deg * (deg - 1) / s**2
+#    
+#    if (der == 3):
+#        tempO = np.eye(Nctrp - der, Nctrp, k = 1)
+#        O = O - 3.0 * tempO
+#        
+#        tempO = np.eye(Nctrp - der, Nctrp, k = 2)
+#        O = O + 3.0 * tempO
+#
+#        tempO = np.eye(Nctrp - der, Nctrp, k = 3)
+#        O = (O + tempO) * deg * (deg - 1) * (deg - 2) / s**3
+        
+    O = genDM(deg, der) / s**der
     return O
 
 
@@ -157,6 +188,7 @@ def genBezierCVX(wp, constr, Q, deg, s=1.0):
         bcvx = matrix(b)
 
         Qcvx = matrix(Q)
+        #print(Q)
         #Qcvx = matrix(np.eye(deg+1))
 
         G = np.empty(shape=(0, deg + 1))
@@ -174,32 +206,33 @@ def genBezierCVX(wp, constr, Q, deg, s=1.0):
             G = np.zeros((deg+1, deg+1))
             h = np.zeros(deg+1)
 
-        #print("G = \n", G)
-        #print("h = \n", h)
+#        print("G = \n", G)
+#        print("h = \n", h)
         Gcvx = matrix(G)
         hcvx = matrix(h)
 
-        solvers.options["abstol"] = 1e-5
+        solvers.options["abstol"] = 1e-6
         sol = solvers.qp(Qcvx, matrix(np.zeros(deg+1)) ,Gcvx , hcvx, Acvx, bcvx)
          
         if sol["status"] == 'optimal':
             print("Solution:")
             print((np.matmul(genConstrM(deg, 2, s), sol["x"])).max())
-            print("Printing  Control Points of the solution")
-            print(np.matmul(genConstrM(deg, 0, s), sol["x"]))
-            print(np.matmul(genConstrM(deg, 1, s), sol["x"]))
-            print(np.matmul(genConstrM(deg, 2, s), sol["x"]))
-
+            print("Printing  Control Points of the solution") 
+            if (constr is not None):
+                nConstr = constr.shape[0]
+                for i in range(nConstr):
+                    print(np.matmul(genConstrM(deg, i, s), sol["x"]))
             done = True
+
         else:
             print(sol['status'])
             sol["x"] = np.matmul(np.linalg.pinv(A), b)
             print("Min squared solution: ", sol["x"])
 
             print("Printing  Control Points of the solution")
-            print(np.matmul(genConstrM(deg, 0, s),sol["x"]))
-            print(np.matmul(genConstrM(deg, 1, s),sol["x"]))
-            print(np.matmul(genConstrM(deg, 2, s),sol["x"]))
+            for i in range(nConstr):
+                print(np.matmul(genConstrM(deg, i, s), sol["x"]))
+            done = True
 
             iterations = iterations + 1
 
@@ -271,10 +304,16 @@ def genBezier(wp, constr, costFun, jac, deg, s=1.0):
     return (res, A, b)
 
 
+def genCostM(deg, order, s=1.0):
+    M = genBezierM(deg)
+    Q = trj_core.genQ([s], deg, order)
+    C = M.transpose() * Q * M
+    return C
+
 
 class Bezier :
     ## Constructor
-    def __init__(self, cntp=None, waypoints=None, constraints=None, degree=None, s=1.0):
+    def __init__(self, cntp=None, waypoints=None, constraints=None, degree=None, s=1.0, opt_der=4):
         # Asking for interpolation
         if (waypoints is not None and degree is not None):
             # Store the waypoints
@@ -290,10 +329,15 @@ class Bezier :
             self.duration = s
 
             M = genBezierM(self.degree)
-            Q = trj_core.genQ([self.duration], self.degree, 4)
-
+            opt_der = opt_der
+            Q = trj_core.genQ([1.0], degree, opt_der) / s**(2 * opt_der - 1)
+           # print("Basic Const = ") 
+           # print(Q)
             self.Q = M.transpose() * Q * M
-            self.Q = (self.Q / np.max(self.Q))
+            #self.Q = (self.Q / np.max(self.Q))
+           
+            D = genDM(degree, opt_der)
+            self.Q = np.matmul(np.transpose(D), D)
 
             # Interpolation problem
             #(sol, A, b) = genBezier(self.wp, self.cnstr, self.costFun, self.bz_jac, self.degree, self.duration)
