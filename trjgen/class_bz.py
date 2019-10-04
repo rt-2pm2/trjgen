@@ -10,7 +10,7 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
 
-from cvxopt import matrix, solvers
+from cvxopt import matrix, solvers, spmatrix
 
 import trjgen.trjgen_core as trj_core
 
@@ -186,8 +186,20 @@ def genBezierCVX(wp, constr, Q, deg, s=1.0):
         # Define CVX objects
         Acvx = matrix(A)
         bcvx = matrix(b)
+        
+        Q_ = np.copy(Q)
+        #for i in range(Q.shape[0]):
+        #    for j in range(Q.shape[1]):
+        #        if abs(Q[i][j]) < 0.0001:
+        #            Q_[i][i] = 0
 
-        Qcvx = matrix(Q)
+        (I, J) =(Q_.nonzero())
+        Q_val = []
+        for num in Q_.flatten():
+            if num != 0:
+                Q_val.append(num)
+
+        Qcvx = spmatrix(Q_val, I, J) 
         #print(Q)
         #Qcvx = matrix(np.eye(deg+1))
 
@@ -328,12 +340,14 @@ class Bezier :
             # Timespan
             self.duration = s
 
-            M = genBezierM(self.degree)
-            opt_der = opt_der
-            Q = trj_core.genQ([1.0], degree, opt_der) / s**(2 * opt_der - 1)
+            self.opt_der = opt_der
+
+            # This was the integral cost
+            #M = genBezierM(self.degree)
+            #Q = trj_core.genQ([1.0], degree, opt_der) / s**(2 * opt_der - 1)
            # print("Basic Const = ") 
            # print(Q)
-            self.Q = M.transpose() * Q * M
+            #self.Q = M.transpose() * Q * M
             #self.Q = (self.Q / np.max(self.Q))
            
             D = genDM(degree, opt_der)
