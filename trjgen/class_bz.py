@@ -181,27 +181,11 @@ def genBezierCVX(wp, constr, Q, deg, s=1.0):
     s0 = s
     while ( not done and iterations < 1): 
         (A, b) = buildInterpolationProblem(wp, deg, s)
-        #print("A = \n", A)
-        #print("b = \n", b)
-        # Define CVX objects
         Acvx = matrix(A)
         bcvx = matrix(b)
         
         Q_ = np.copy(Q)
-        #for i in range(Q.shape[0]):
-        #    for j in range(Q.shape[1]):
-        #        if abs(Q[i][j]) < 0.0001:
-        #            Q_[i][i] = 0
-
-        (I, J) =(Q_.nonzero())
-        Q_val = []
-        for num in Q_.flatten():
-            if num != 0:
-                Q_val.append(num)
-
-        Qcvx = spmatrix(Q_val, I, J) 
-        #print(Q)
-        #Qcvx = matrix(np.eye(deg+1))
+        Qcvx = matrix(Q_) 
 
         G = np.empty(shape=(0, deg + 1))
         h = [] 
@@ -218,8 +202,7 @@ def genBezierCVX(wp, constr, Q, deg, s=1.0):
             G = np.zeros((deg+1, deg+1))
             h = np.zeros(deg+1)
 
-#        print("G = \n", G)
-#        print("h = \n", h)
+
         Gcvx = matrix(G)
         hcvx = matrix(h)
 
