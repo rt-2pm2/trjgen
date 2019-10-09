@@ -147,12 +147,25 @@ print("\n\n")
 print("Class Construction")
 bz_x = bz.Bezier(waypoints=X, constraints=x_cnstr, degree=ndeg, s=T, opt_der = 3)
 
-#
-#print("Evaluation of the bezier polynomial")
-#print(bz_x.eval(1.0, [0,1,2]))
-#
-#
-#
+
+
+print("\n\n")
+print("Class Construction with Control Points")
+print("Previous CTRL points:")
+cntps = bz_x.getControlPts()
+print(cntps)
+bz_x_ctrl = bz.Bezier(cntps)
+print(bz_x_ctrl)
+
+
+
+print("Evaluation of the bezier polynomial")
+print(bz_x.eval(1.0, [0,1,2]))
+print(bz_x_ctrl.eval(1.0, [0,1,2]))
+
+
+
+
 ##### PLOT
 #N = 100
 #test_y = np.zeros((N, 3), dtype=float)

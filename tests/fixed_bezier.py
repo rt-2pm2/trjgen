@@ -24,6 +24,7 @@ def computeDelta(coeff):
 
         return delta
 
+
 if __name__ == "__main__":
     
     NCPPoints = 6
@@ -35,20 +36,30 @@ if __name__ == "__main__":
 
     print("Passing ")
 
-    Pf = float(sys.argv[1])
-    print("Final Point: ", Pf)
-    Vf = float(sys.argv[2])
-    print("Final Velocity: ", Vf)
-    Af = float(sys.argv[3])
-    print("Final Acceleration: ", Af)
-    t = float(sys.argv[4])
-    print("Final Time: ", t)
 
-    if (len(sys.argv) > 5):
-        Al = float(sys.argv[5])
-        print("Lower bound: ", Al)
-        Au = float(sys.argv[6])
-        print("Upper bound: ", Au)
+    if (len(sys.argv) > 1):
+        Pf = float(sys.argv[1])
+        print("Final Point: ", Pf)
+        Vf = float(sys.argv[2])
+        print("Final Velocity: ", Vf)
+        Af = float(sys.argv[3])
+        print("Final Acceleration: ", Af)
+        t = float(sys.argv[4])
+        print("Final Time: ", t)
+
+        if (len(sys.argv) > 5):
+            Al = float(sys.argv[5])
+            print("Lower bound: ", Al)
+            Au = float(sys.argv[6])
+            print("Upper bound: ", Au)
+    else:
+        Pf =   0.95859714
+        Vf =  -0.39338241
+        Af =  -8.02907341
+        t = 3.5
+        Au = 4
+        Al = -9.85
+
     
     P[0] = 0.0
     P[1] = 0.0
