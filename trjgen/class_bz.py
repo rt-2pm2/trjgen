@@ -74,37 +74,6 @@ def genConstrM(deg, der, s=1.0):
     Generate the matrix which maps position control points
     into velocity and acceleration control points
     """
-#    Nctrp = deg + 1
-#    O = np.eye(Nctrp - der, Nctrp)
-#    if (der == 1):
-#        # v_i = n * (x_i - x_(i - 1))
-#        # -1  1  0  0
-#        #  0 -1  1  0
-#        #  0  0 -1  1
-#        #
-#        tempO = np.eye(Nctrp - der, Nctrp, k = 1)
-#        O = (tempO - O) * deg / s
-#
-#    if (der == 2):
-#        # a_i = n * (n - 1) * (x_i - 2 x_(i - 1) + x_(i - 2))
-#        # 1 -2  1  0  0
-#        # 0  1 -2  1  0
-#        # 0  0  1 -2  1
-#        tempO = np.eye(Nctrp - der, Nctrp, k = 1)
-#        O = O - 2.0 * tempO
-#
-#        tempO = np.eye(Nctrp - der, Nctrp, k = 2)
-#        O = (O + tempO) * deg * (deg - 1) / s**2
-#    
-#    if (der == 3):
-#        tempO = np.eye(Nctrp - der, Nctrp, k = 1)
-#        O = O - 3.0 * tempO
-#        
-#        tempO = np.eye(Nctrp - der, Nctrp, k = 2)
-#        O = O + 3.0 * tempO
-#
-#        tempO = np.eye(Nctrp - der, Nctrp, k = 3)
-#        O = (O + tempO) * deg * (deg - 1) * (deg - 2) / s**3
         
     O = genDM(deg, der) / s**der
     return O
@@ -175,6 +144,57 @@ def bz_hess(x):
     Q = trj_core.genQ([1.0], deg, 4)
     return 2.0 * M.transpose() * Q * M
 
+def call_CVXsolver(C, A, b, G, h, s):
+
+    nConstr = G.shape[0]
+    nCoeff = A.shape[1] - 1
+    deg = nCoeff - 1
+
+    Ccvx = matrix(C)
+    Acvx = matrix(A)
+    bcvx = matrix(b)
+    Gcvx = matrix(G)
+    hcvx = matrix(h)
+
+    solvers.options["abstol"] = 1e-6
+    #sol = solvers.qp(Qcvx, matrix(np.zeros(deg+1)) ,Gcvx , hcvx, Acvx, bcvx)
+    sol = solvers.lp(c = Ccvx, G = Gcvx , h = hcvx, A = Acvx, b = bcvx)
+
+    if sol["status"] == 'optimal':
+        print("Solution: ")
+        print(sol['x'])
+
+        print("Printing  Control Points of the solution") 
+        x = sol['x'][0 : nCoeff]
+        for i in range(3):
+            print(np.matmul(genConstrM(deg, i, s), x))
+
+    else:
+        print(sol['status'])
+#            print("C = ")
+#            print(C)
+#
+#            print("A = ")
+#            print(A)
+#
+#            print("b = ")
+#            print(b)
+#
+#            print("G = ")
+#            print(G)
+#
+#            print("h = ")
+#            print(h)
+
+        sol["x"] = np.matmul(np.linalg.pinv(A), b)
+        print("Min squared solution: ", sol["x"])
+
+        print("Printing  Control Points of the solution")
+        for i in range(3):
+            x = sol['x'][0 : nCoeff]
+            print(np.matmul(genConstrM(deg, i, s), x))
+        
+    return sol 
 
 
 def genBezierCVX(wp, constr, Q, deg, s=1.0):
@@ -193,12 +213,9 @@ def genBezierCVX(wp, constr, Q, deg, s=1.0):
             return (sol, A, b)
 
         A = np.concatenate((A, np.zeros((A.shape[0], 1))), axis=1)
-        Acvx = matrix(A)
-        bcvx = matrix(b)
-        
+                
         C = np.zeros(nCoeff + 1)
         C[nCoeff] = 1
-        Ccvx = matrix(C)
         #Q_ = np.copy(Q)
         #Qcvx = matrix(Q_) 
 
@@ -224,53 +241,11 @@ def genBezierCVX(wp, constr, Q, deg, s=1.0):
             G = np.zeros((nCoeff + 1, nCoeff + 1))
             h = np.zeros(nCoeff + 1)
 
+        sol = call_CVXsolver(C, A, b, G, h, s)
+        iterations = iterations + 1
 
-        Gcvx = matrix(G)
-        hcvx = matrix(h)
-
-        solvers.options["abstol"] = 1e-6
-        #sol = solvers.qp(Qcvx, matrix(np.zeros(deg+1)) ,Gcvx , hcvx, Acvx, bcvx)
-        sol = solvers.lp(c = Ccvx, G = Gcvx , h = hcvx, A = Acvx, b = bcvx)
-
-        if sol["status"] == 'optimal':
-            print("Solution: ")
-            print(sol['x'])
-
-            print("Printing  Control Points of the solution") 
-            if (constr is not None):
-                x = sol['x'][0 : nCoeff]
-                nConstr = constr.shape[0]
-                for i in range(nConstr):
-                    print(np.matmul(genConstrM(deg, i, s), x))
+        if (sol['status'] == 'optimal'):
             done = True
-
-        else:
-            print(sol['status'])
-#            print("C = ")
-#            print(C)
-#
-#            print("A = ")
-#            print(A)
-#
-#            print("b = ")
-#            print(b)
-#
-#            print("G = ")
-#            print(G)
-#
-#            print("h = ")
-#            print(h)
-
-            sol["x"] = np.matmul(np.linalg.pinv(A), b)
-            print("Min squared solution: ", sol["x"])
-
-            print("Printing  Control Points of the solution")
-            for i in range(nConstr):
-                x = sol['x'][0 : nCoeff]
-                print(np.matmul(genConstrM(deg, i, s), x))
-            done = True
-
-            iterations = iterations + 1
 
     return (sol, A, b)
 
