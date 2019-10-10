@@ -6,6 +6,10 @@ import numpy as np
 from scipy.optimize import minimize
 #from scipy.optimize import LinearConstraint
 
+np.set_printoptions(precision=2)
+np.set_printoptions(suppress=True)
+
+
 import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
@@ -179,54 +183,91 @@ def genBezierCVX(wp, constr, Q, deg, s=1.0):
     done = False
     iterations = 0;
     s0 = s
+
+    # The solution vector is [ctrl_ps, t]
     while ( not done and iterations < 1): 
         (A, b) = buildInterpolationProblem(wp, deg, s)
+        if (b.any() == False):
+            sol = dict()
+            sol['x'] = np.zeros(nCoeff + 1)
+            return (sol, A, b)
+
+        A = np.concatenate((A, np.zeros((A.shape[0], 1))), axis=1)
         Acvx = matrix(A)
         bcvx = matrix(b)
         
-        Q_ = np.copy(Q)
-        Qcvx = matrix(Q_) 
+        C = np.zeros(nCoeff + 1)
+        C[nCoeff] = 1
+        Ccvx = matrix(C)
+        #Q_ = np.copy(Q)
+        #Qcvx = matrix(Q_) 
 
-        G = np.empty(shape=(0, deg + 1))
+        G = np.empty(shape=(0, nCoeff + 1))
         h = [] 
+        CM = genConstrM(deg, 3, s) 
+        CM = np.concatenate((CM, -CM), axis=0)
+        CM = np.concatenate((-CM, -np.ones((CM.shape[0], 1))), axis=1)
+        G =  np.vstack((G, CM)) 
+
+        h = np.concatenate((h, np.zeros(G.shape[0])))
         if (constr is not None):
             nConstr = constr.shape[0]
             for i in range(nConstr):
                 CM = genConstrM(deg, i, s)
+                CM = np.concatenate((CM, np.zeros((CM.shape[0], 1))), axis=1)
                 G =  np.vstack((G, -CM, CM)) 
 
                 clow = np.ones(CM.shape[0]) * constr[i, 0]
                 cup  = np.ones(CM.shape[0]) * constr[i, 1]
                 h = np.concatenate((h, -clow, cup))
         else:
-            G = np.zeros((deg+1, deg+1))
-            h = np.zeros(deg+1)
+            G = np.zeros((nCoeff + 1, nCoeff + 1))
+            h = np.zeros(nCoeff + 1)
 
 
         Gcvx = matrix(G)
         hcvx = matrix(h)
 
         solvers.options["abstol"] = 1e-6
-        sol = solvers.qp(Qcvx, matrix(np.zeros(deg+1)) ,Gcvx , hcvx, Acvx, bcvx)
-         
+        #sol = solvers.qp(Qcvx, matrix(np.zeros(deg+1)) ,Gcvx , hcvx, Acvx, bcvx)
+        sol = solvers.lp(c = Ccvx, G = Gcvx , h = hcvx, A = Acvx, b = bcvx)
+
         if sol["status"] == 'optimal':
-            print("Solution:")
-            print((np.matmul(genConstrM(deg, 2, s), sol["x"])).max())
+            print("Solution: ")
+            print(sol['x'])
+
             print("Printing  Control Points of the solution") 
             if (constr is not None):
+                x = sol['x'][0 : nCoeff]
                 nConstr = constr.shape[0]
                 for i in range(nConstr):
-                    print(np.matmul(genConstrM(deg, i, s), sol["x"]))
+                    print(np.matmul(genConstrM(deg, i, s), x))
             done = True
 
         else:
             print(sol['status'])
+#            print("C = ")
+#            print(C)
+#
+#            print("A = ")
+#            print(A)
+#
+#            print("b = ")
+#            print(b)
+#
+#            print("G = ")
+#            print(G)
+#
+#            print("h = ")
+#            print(h)
+
             sol["x"] = np.matmul(np.linalg.pinv(A), b)
             print("Min squared solution: ", sol["x"])
 
             print("Printing  Control Points of the solution")
             for i in range(nConstr):
-                print(np.matmul(genConstrM(deg, i, s), sol["x"]))
+                x = sol['x'][0 : nCoeff]
+                print(np.matmul(genConstrM(deg, i, s), x))
             done = True
 
             iterations = iterations + 1
@@ -344,7 +385,7 @@ class Bezier :
             
             # Control points of the bezier curve
             #self.cntp = np.array(sol.x)
-            self.cntp = np.array(sol["x"])
+            self.cntp = np.array(sol["x"][0: self.degree + 1])
 
         elif (cntp is not None):
             self.cntp = cntp
