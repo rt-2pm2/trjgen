@@ -365,7 +365,7 @@ class Bezier :
         elif (cntp is not None):
             self.cntp = cntp
 
-            self.degree = cntp.size - 1
+            self.degree = len(cntp) - 1
 
     # Evaluate the Bezier polynomial
     def eval(self, t, der = [0]):
