@@ -98,9 +98,9 @@ def buildInterpolationProblem(X, deg, s=1.0):
     nWp = X.shape[1]       # Number of waypoints
     nEq = nConstr * 2      # Number of equations
 
-    print("Degree of the Bezier curve = " + str(deg))
-    print("Number of control points = " + str(nCoef))
-    print("Number of equality constraints = " + str(nEq))
+   # print("Degree of the Bezier curve = " + str(deg))
+   # print("Number of control points = " + str(nCoef))
+   # print("Number of equality constraints = " + str(nEq))
 
 
     # Instantiate the output variables
@@ -161,16 +161,16 @@ def call_CVXsolver(C, A, b, G, h, s):
     sol = solvers.lp(c = Ccvx, G = Gcvx , h = hcvx, A = Acvx, b = bcvx)
 
     if sol["status"] == 'optimal':
-        print("Solution: ")
-        print(sol['x'])
+        #print("Solution: ")
+        #print(sol['x'])
 
-        print("Printing  Control Points of the solution") 
+        #print("Printing  Control Points of the solution") 
         x = sol['x'][0 : nCoeff]
-        for i in range(3):
-            print(np.matmul(genConstrM(deg, i, s), x))
+        #for i in range(3):
+        #    print(np.matmul(genConstrM(deg, i, s), x))
 
     else:
-        print(sol['status'])
+#        print(sol['status'])
 #            print("C = ")
 #            print(C)
 #
@@ -185,14 +185,13 @@ def call_CVXsolver(C, A, b, G, h, s):
 #
 #            print("h = ")
 #            print(h)
-
         sol["x"] = np.matmul(np.linalg.pinv(A), b)
-        print("Min squared solution: ", sol["x"])
+#        print("Min squared solution: ", sol["x"])
 
-        print("Printing  Control Points of the solution")
+#        print("Printing  Control Points of the solution")
         for i in range(3):
             x = sol['x'][0 : nCoeff]
-            print(np.matmul(genConstrM(deg, i, s), x))
+            #print(np.matmul(genConstrM(deg, i, s), x))
         
     return sol 
 
