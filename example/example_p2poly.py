@@ -32,41 +32,47 @@ ndeg = 7
 print('Test with {:d}th order polynomial.'.format(ndeg))
 
 ## Waipoints in the flat output space (or dimension 3)
-nconstr = 4
+nconstr = 3
 print('Number of constraint on the flat output = {:d}.'.format(nconstr))
 
 
 # Build the constraint matrix
+#X = np.array([
+#        [ 0,   1.0,      1.0,      0.0,     0.0],
+#        [ 0,   0.1,      -0.1,      -0.1,     0.0],
+#        [ 0,   np.nan,   np.nan,   np.nan,  0.0],
+#        [ 0,   np.nan,   np.nan,   np.nan,  0.0],
+#        ])
+
 X = np.array([
-        [ 0,     1.0,    0.5],
-        [ 0,     0.8,   0.0],
-        [ 0,   -9.0,     0.0],
-        [ 0,   np.nan,   0.0],
+        [ 0,   0.0,      0.0,      0.0,     0.0],
+        [ 0,   0.0,      0.0,      0.0,     0.0],
+        [ 0,   np.nan,   np.nan,   np.nan,  0.0],
+        [ 0,   np.nan,   np.nan,   np.nan,  0.0],
         ])
 
 Y = np.array([
-        [ 0,   0.0,      0.0],
-        [ 0,   0.0,      0.0],
-        [ 0,   0.0,      0.0],
-        [ 0,   np.nan,   0.0],
+        [ 0,   0.0,      1.0,      1.0,     0.0],
+        [ 0,   0.1,      0.1,      -0.1,     0.0],
+        [ 0,   np.nan,   np.nan,   np.nan,  0.0],
+        [ 0,   np.nan,   np.nan,   np.nan,  0.0],
         ])
 
 Z = np.array([
-        [ 0,   0.0,     -0.2],
-        [ 0,   0.0,      0.0],
-        [ 0,   0.0,      0.0],
-        [ 0,   np.nan,   0.0],
+        [ 0,   0.5,      0.5,      0.0,     0.0],
+        [ 0,   0.1,      -0.1,      -0.1,     0.0],
+        [ 0,   np.nan,   np.nan,   np.nan,  0.0],
+        [ 0,   np.nan,   np.nan,   np.nan,  0.0],
         ])
 
 W = np.array([
-        [ 0,   np.nan,      0.0],
-        [ 0,   np.nan,      0.0],
-        [ 0,   np.nan,      0.0],
-        [ 0,   np.nan,      0.0],
+        [ 0.0,   0.0,      0.0,      0.0,   0.001],
+        [ 0.0,   0.0,      0.0,      0.0,   0.0],
+        [ 0.0,   0.0,      0.0,      0.0,   0.0],
+        [ 0,   np.nan,   np.nan,   np.nan,  0.0],
         ])
-
 # Times (Absolute and intervals)
-knots = np.array([0, 1.5, 3]) # One second each piece
+knots = np.array(range(5)) * 3.0
 
 # Generate the polynomial
 ppx = pw.PwPoly(X, knots, ndeg)
@@ -83,14 +89,14 @@ tv = np.linspace(0,max(knots),100);
 x_coeff = ppx.getCoeffMat();
 y_coeff = ppy.getCoeffMat();
 z_coeff = ppz.getCoeffMat();
-w_coeff = ppy.getCoeffMat();
+w_coeff = ppw.getCoeffMat();
 
 Dt = knots[1:len(knots)] - knots[0:len(knots)-1]
 tj.pp2file(Dt, x_coeff, y_coeff, z_coeff, w_coeff, "./poly.csv")
 
-ply.plotZb_plotly(Xtj, Ytj, Ztj, Zbtj)
+#ply.plotZb_plotly(Xtj, Ytj, Ztj, Zbtj)
 
-#tjh.plotTraj(Xtj, Ytj, Ztj, Wtj, Zbtj, tv, [0,1,2],0.03)
+tjh.plotTraj(Xtj, Ytj, Ztj, Wtj, Zbtj, tv, [0,1,2],0.03)
 #ply.plotTray_plotly(Xtj, Ytj, Ztj, tv)
 
 #ply.plotThrustMargin(tv, Xtj, Ytj, Ztj, vehicle_mass, thust_thr)
