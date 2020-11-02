@@ -85,3 +85,6 @@ class BezierCurve:
 
 
         return (X, Y, Z, W, R, Omega)
+
+    def get_duration(self):
+        return self.duration

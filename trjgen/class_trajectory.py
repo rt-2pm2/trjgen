@@ -19,6 +19,8 @@ class Trajectory:
         self.pz = pwpz
         self.pw = pwpw
 
+        self.duration  = pwpx.getDuration()
+
 
     ## Evaluate the trajectory at a time 't' over a list
     ## of derivative 'derlist'
@@ -87,6 +89,8 @@ class Trajectory:
         return (X, Y, Z, W, R, Omega)
 
 
+    def get_duration(self):
+        return self.duration
 
     def writeTofile(self, Dt, filename='./trjfile.csv'):
         # Save the polynomial coefficients on file

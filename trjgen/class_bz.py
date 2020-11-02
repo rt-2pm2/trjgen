@@ -157,6 +157,7 @@ def call_CVXsolver(C, A, b, G, h, s):
     hcvx = matrix(h)
 
     solvers.options["abstol"] = 1e-6
+    solvers.options["show_progress"] = False
     #sol = solvers.qp(Qcvx, matrix(np.zeros(deg+1)) ,Gcvx , hcvx, Acvx, bcvx)
     sol = solvers.lp(c = Ccvx, G = Gcvx , h = hcvx, A = Acvx, b = bcvx)
 

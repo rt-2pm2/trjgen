@@ -23,6 +23,8 @@ class PwPoly :
             # Knots (It's assumed that the knot of the first point is 0.0)
             self.knots = np.array(knots)
 
+            self.duration = max(self.knots)
+
         if degree is not None:
             # Degree of the polynomial
             self.degree = degree
@@ -177,6 +179,9 @@ class PwPoly :
         """
         coeff_v = self.coeff_v
         return coeff_v
+
+    def getDuration(self):
+        return self.duration
 
     def loadFromData(self, M, Dt, npieces):
         """
