@@ -21,7 +21,8 @@ np.set_printoptions(suppress=True)
 # Polynomial degree
 ndeg = 7;
 
-t = np.array([0, 1, 5])
+
+t = np.array(range(5)) * 3.0
 Dt = t[1:len(t)] - t[0:len(t)-1]
 
 toff = np.zeros(len(Dt) + 1);
@@ -29,24 +30,24 @@ toff[1: len(Dt) + 1] = np.matmul(np.tril(np.ones((len(Dt), len(Dt))), 0), np.arr
 
 # Build the constraint matrix
 X = np.array([
-        [ 0,   1.0,      2.0],
-        [ 0,   0.01,      0.0],
-        [ 0, -10.0,      0.0],
-        [ 0,   np.nan,   0.0],
+        [ 0,   1.5,      1.5,      0.0,     0.0],
+        [ 0,   0.0,      0.0,      0.0,     0.0],
+        [ 0,   np.nan,   np.nan,   np.nan,  0.0],
+        [ 0,   np.nan,   np.nan,   np.nan,  0.0],
         ])
 
 Y = np.array([
-        [ 0,   0.0,      0.0],
-        [ 0,   0.0,      0.0],
-        [ 0,   0.0,      0.0],
-        [ 0,   np.nan,   0.0],
+        [ 0,   0.0,      1.5,      1.5,     0.0],
+        [ 0,   0.0,      0.0,      0.0,     0.0],
+        [ 0,   np.nan,   np.nan,   np.nan,  0.0],
+        [ 0,   np.nan,   np.nan,   np.nan,  0.0],
         ])
 
 Z = np.array([
-        [ 0,   0.0,     -0.2],
-        [ 0,   0.0,      0.0],
-        [ 0,   0.0,      0.0],
-        [ 0,   np.nan,   0.0],
+        [ 0,   0.0,      0.0,      0.0,     0.0],
+        [ 0,   np.nan,   np.nan,   np.nan,  0.0],
+        [ 0,   np.nan,   np.nan,   np.nan,  0.0],
+        [ 0,   np.nan,   np.nan,   np.nan,  0.0],
         ])
 
 
@@ -55,13 +56,13 @@ Z = np.array([
 (soly, nully, resy, polysy) = tj.interpolPolys(Y, ndeg, Dt, False)
 (solz, nullz, resz, polysz) = tj.interpolPolys(Z, ndeg, Dt, False)
 
-M1y = (np.matmul(np.matmul(nullx.transpose(), Q), nullx))
-M2y = -np.matmul(np.matmul(np.linalg.inv(M1y), nullx.transpose()), Q)
-vy = np.matmul(M2y, soly)
-
-M1y = (np.matmul(np.matmul(nullx.transpose(), Q), nullx))
-M2y = -np.matmul(np.matmul(np.linalg.inv(M1y), nullx.transpose()), Q)
-vy = np.matmul(M2y, soly)
+#M1y = (np.matmul(np.matmul(nullx.transpose(), Q), nullx))
+#M2y = -np.matmul(np.matmul(np.linalg.inv(M1y), nullx.transpose()), Q)
+#vy = np.matmul(M2y, soly)
+#
+#M1y = (np.matmul(np.matmul(nullx.transpose(), Q), nullx))
+#M2y = -np.matmul(np.matmul(np.linalg.inv(M1y), nullx.transpose()), Q)
+#vy = np.matmul(M2y, soly)
 
 
 
@@ -132,6 +133,12 @@ axz.set_title("Zdd")
 axz.set_xlabel("time [s]")
 plt.tight_layout()
 axz.grid(True)
+
+plt.figure()
+axxx = plt.subplot()
+axxx.plot(Xtj[0,:], Ytj[0,:])
+axxx.set_title("XY Trajectory")
+
 
 plt.show()
 #(ffthrust, available_thrust) = tj_h.plotThrustMargin(T, Xtj, Ytj, Ztj, 0.0032, 9.91 * 0.032 * 2)

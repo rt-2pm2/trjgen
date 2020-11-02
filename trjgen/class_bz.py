@@ -326,7 +326,7 @@ class Bezier :
     ## Constructor
     def __init__(self, cntp=None, waypoints=None, constraints=None, degree=None, s=1.0, opt_der=4):
         # Asking for interpolation
-        self.duration = s 
+        self.duration = s
         self.opt_der = opt_der
 
         if (waypoints is not None and degree is not None):

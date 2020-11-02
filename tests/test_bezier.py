@@ -29,7 +29,7 @@ for i in range(1,5):
     print("M({}) = ".format(i))
     print(genBezierM(i))
 
-ndeg = 8 
+ndeg = 5 
 print("\nConstr Matrices for {} deg poly".format(ndeg))
 for i in range(ndeg):
     print("Constr matrix for {} derivative".format(i))
@@ -59,7 +59,7 @@ x_cnstr = np.array([[-0.5, 1.0], [-5.0, 5.0], [-25.0, 25.0]])
 
 
 
-T = 1.0
+T = 0.7
 ## Testing the components of the Bezier polynomial generation:
 (A, b) = buildInterpolationProblem(X, ndeg, T)
 
@@ -154,29 +154,28 @@ print("Class Construction with Control Points")
 print("Previous CTRL points:")
 cntps = bz_x.getControlPts()
 print(cntps)
-bz_x_ctrl = bz.Bezier(cntps)
-print(bz_x_ctrl)
+
+bz_x = bz.Bezier(np.array([0, 0.2, 0.4, 0.405, 0.776, 1]), s=T)
+
+print("Control Points: ")
+PPoints = bz_x.getControlPts()
+print(PPoints)
+print("Velocity Control Points: ")
+print(np.matmul(genDM(5, 1), PPoints))
 
 
-
-print("Evaluation of the bezier polynomial")
-print(bz_x.eval(1.0, [0,1,2]))
-print(bz_x_ctrl.eval(1.0, [0,1,2]))
-
-
+#### PLOT
+N = 100
+test_y = np.zeros((N, 3), dtype=float)
+t = np.zeros((N), dtype=float)
 
 
-##### PLOT
-#N = 100
-#test_y = np.zeros((N, 3), dtype=float)
-#t = np.zeros((N), dtype=float)
-#
-#Xtj = np.zeros((N, 4), dtype=float)
-#for i in range(N):
-#    t[i] = T/(N - 1) * i
-#    Xtj[i, :] = bz_x.eval(t[i], [0,1,2,3])
-#
-#fig, axs = plt.subplots(4, 1)
+Xtj = np.zeros((N, 3), dtype=float)
+for i in range(N):
+    t[i] = T/(N - 1) * i
+    Xtj[i, :] = bz_x.eval(t[i], [0,1,2])
+
+#fig, axs = plt.subplots(3, 1)
 #axs[0].plot(t, Xtj[:, 0], t, np.ones(N) * x_cnstr[0,0], t, np.ones(N) * x_cnstr[0,1], T, X[0,1], 'o')
 #axs[0].set_title("p")
 #
@@ -186,8 +185,8 @@ print(bz_x_ctrl.eval(1.0, [0,1,2]))
 #axs[2].plot(t, Xtj[:, 2], t, np.ones(N) * x_cnstr[2,0], t, np.ones(N) * x_cnstr[2,1], T, X[2,1], 'o')
 #axs[2].set_title("a")
 #
-#axs[3].plot(t, Xtj[:, 3], t, np.ones(N) * x_cnstr[3,0], t, np.ones(N) * x_cnstr[3,1])
-#axs[3].set_title("a")
-#
-#
-#plt.show()
+
+plt.plot(t, Xtj[:, 2])
+
+
+plt.show()
